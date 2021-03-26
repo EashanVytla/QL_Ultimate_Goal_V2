@@ -1,11 +1,19 @@
 package org.firstinspires.ftc.teamcode.Odometry;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Transform2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.spartronics4915.lib.T265Camera;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
+import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 import org.openftc.revextensions2.RevBulkData;
 
 @Config
@@ -42,8 +50,72 @@ public class S4T_Localizer {
     public static double clipping_vert = 0;
     public final Vector2d DASHBOARD_OFFSET_FROM_CENTER = new Vector2d(-48, -55);
 
-    public S4T_Localizer(Telemetry telemetry){
+    //T265 Camera Instance Variables:
+    private static T265Camera slamra;
+    public double move_power = 1.0;
+    public double turn_power = 1.0;
+
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
+    private GamepadEx gamepadEx;
+    private final double odoCovariance = 0.01;
+
+    Transform2d OFFSET = new Transform2d(new Translation2d(-8.6247211/39.37, 0), Rotation2d.fromDegrees(90));
+
+    Translation2d translation = new Translation2d(0, 0);
+    Rotation2d rotation = new Rotation2d(0, 0);
+
+    private final int robotRadius = 9; // inches
+    private HardwareMap hardwareMap;
+
+    public S4T_Localizer(HardwareMap map, Telemetry telemetry){
         this.telemetry = telemetry;
+        this.hardwareMap = map;
+
+        if(slamra == null){
+            try{
+                slamra = new T265Camera(OFFSET, odoCovariance, map.appContext);
+            }catch (Exception e){
+                slamra = null;
+                telemetry.addData("ERROR","Couldn't find the camera... Trying again...");
+            }
+        }
+
+        telemetry.addData("Is started?", slamra.isStarted());
+
+        if(slamra != null){
+            //slamra.setPose(new Pose2d(0, 0, new Rotation2d(0)));
+
+            if(!slamra.isStarted()){
+                slamra.start();
+            }
+        }
+    }
+
+    public Pose2d getT265Pose(double xVelo, double yVelo){
+        if(slamra == null){
+            telemetry.addData("IT IS NULL", "IT IS NULL");
+            try{
+                slamra = new T265Camera(OFFSET, odoCovariance, hardwareMap.appContext);
+                slamra.start();
+            }catch (Exception e){
+                slamra = null;
+                telemetry.addData("ERROR","Couldn't find the camera... Trying again...");
+            }
+
+            return new Pose2d(0, 0, 0);
+        }else{
+            gamepadEx.loop();
+
+            slamra.sendOdometry(-xVelo, -yVelo);
+
+            T265Camera.CameraUpdate up = slamra.getLastReceivedCameraUpdate();
+            if (up == null) return new Pose2d(0, 0, 0);
+
+            translation = new Translation2d(up.pose.getTranslation().getX() * 39.37, up.pose.getTranslation().getY() * 39.37);
+            rotation = up.pose.getRotation();
+
+            return new Pose2d(translation.getX(), translation.getX(), rotation.getRadians());
+        }
     }
 
     public double wf = 1;

@@ -20,6 +20,8 @@ public class LinearTeleOp extends LinearOpMode {
 
         waitForStart();
 
+        robot.flicker.start();
+
         while(opModeIsActive() && !isStopRequested()){
             robot.updateBulkData();
 

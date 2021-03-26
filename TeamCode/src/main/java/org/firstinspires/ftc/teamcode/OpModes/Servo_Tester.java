@@ -40,11 +40,11 @@ public class Servo_Tester extends LinearOpMode {
             }else{
                 if (gamepad1.dpad_up) {
                     if(pos < 1){
-                        pos += 0.00001;
+                        pos += 0.001;
                     }
                 } else if (gamepad1.dpad_down){
                     if(pos > 0){
-                        pos -= 0.00001;
+                        pos -= 0.001;
                     }
                 }
 
