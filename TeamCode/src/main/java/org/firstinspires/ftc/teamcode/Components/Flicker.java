@@ -9,9 +9,9 @@ import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class Flicker {
-    private final double outPos = 0.5;
-    private final double inPos = 0.5;
-    private final double flickerSpeed = 0.5;
+    private final double outPos = 0.48;
+    private final double inPos = 0.55;
+    private final double flickerSpeed = 0.04;
 
     Telemetry telemetry;
     Caching_Servo flicker;
@@ -21,6 +21,10 @@ public class Flicker {
 
     protected Flicker(HardwareMap hardwareMap, Telemetry telemetry){
         flicker = new Caching_Servo(hardwareMap, "flicker");
+
+        flicker.setPosition(inPos);
+        flicker.write();
+
         this.telemetry = telemetry;
         time = new ElapsedTime();
     }
@@ -31,6 +35,7 @@ public class Flicker {
 
     public void operate(GamepadEx gamepad1){
         if(gamepad1.isPress(GamepadEx.Control.a)){
+            time.reset();
             flick = true;
         }
 
