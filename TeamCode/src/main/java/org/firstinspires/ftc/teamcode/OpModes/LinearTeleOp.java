@@ -20,22 +20,12 @@ public class LinearTeleOp extends LinearOpMode {
 
         waitForStart();
 
-        robot.flicker.start();
+        robot.start();
 
         while(opModeIsActive() && !isStopRequested()){
-            robot.updateBulkData();
+            robot.operate(gamepad1ex, gamepad2ex);
 
-            robot.drive.driveCentric(gamepad1, 1.0, 1.0, robot.getPos().getHeading() + Math.toRadians(90));
-            robot.flicker.operate(gamepad1ex);
-
-            telemetry.addData("Robot Position:", robot.getPos());
-
-            gamepad1ex.loop();
-            gamepad2ex.loop();
             telemetry.update();
-            robot.drive.write();
-            robot.updatePos();
-            robot.flicker.write();
         }
     }
 }

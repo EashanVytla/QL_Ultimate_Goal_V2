@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipelineV2;
+import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -19,7 +20,8 @@ import org.openftc.revextensions2.RevBulkData;
 
 public class Robot {
     public Mecanum_Drive drive;
-    public Flicker flicker;
+    public Shooter shooter;
+    public Intake intake;
 
     public ExpansionHubEx hub1;
     public ExpansionHubEx hub2;
@@ -38,10 +40,13 @@ public class Robot {
     OpenCvCamera webcam;
     RingDetectionPipelineV2 detector;
     Pose2d startPos = new Pose2d(0, 0, 0);
+    private static boolean continuousMode = false;
 
     public Robot(HardwareMap map, Telemetry telemetry){
         this.hardwareMap = map;
         this.telemetry = telemetry;
+
+        continuousMode = false;
 
         hub1 = map.get(ExpansionHubEx.class, "Expansion Hub 173");
         hub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
@@ -52,11 +57,42 @@ public class Robot {
         encoderRX = new S4T_Encoder(map, "back_right");
 
         drive = new Mecanum_Drive(map, telemetry);
-        flicker = new Flicker(map, telemetry);
+        shooter = new Shooter(map, telemetry);
+        intake = new Intake(map, telemetry);
 
         updateBulkData();
 
-        localizer = new S4T_Localizer(telemetry);
+        localizer = new S4T_Localizer(hardwareMap, telemetry);
+    }
+
+    public void start(){
+        shooter.flicker.start();
+    }
+
+    public void operate(GamepadEx gamepad1, GamepadEx gamepad2){
+        updateBulkData();
+
+        if(gamepad1.isPress(GamepadEx.Control.dpad_left))
+            continuousMode = !continuousMode;
+
+        drive.driveCentric(gamepad1.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
+
+        shooter.operate(gamepad1, getData2());
+        intake.operate(gamepad1);
+
+        telemetry.addData("Robot Position:", getPos());
+
+        telemetry.addLine("Shooting in " + (isContinuous() ? "continuous mode" : "flicker mode") + "...");
+
+        updatePos();
+
+        drive.write();
+        intake.write();
+        shooter.write();
+    }
+
+    public static boolean isContinuous(){
+        return continuousMode;
     }
 
     public double getVelocityXMetersPerSecond(){

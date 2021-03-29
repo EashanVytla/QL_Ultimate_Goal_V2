@@ -15,7 +15,7 @@ public class Flicker {
 
     Telemetry telemetry;
     Caching_Servo flicker;
-    private boolean flick = false;
+    protected boolean flick = false;
     private int flickState = 0;
     private ElapsedTime time;
 
@@ -27,38 +27,36 @@ public class Flicker {
 
         this.telemetry = telemetry;
         time = new ElapsedTime();
+        time.reset();
     }
 
     public void start(){
         time.startTime();
     }
 
-    public void operate(GamepadEx gamepad1){
-        if(gamepad1.isPress(GamepadEx.Control.a)){
-            time.reset();
-            flick = true;
-        }
+    public void resetTime(){
+        time.reset();
+    }
 
-        if(flick){
-            if(flickState % 2 == 0){
-                if(time.time() > flickerSpeed){
-                    time.reset();
-                    flickState++;
-                }
+    public void flick(){
+        if(flickState % 2 == 0){
+            if(time.time() > flickerSpeed){
+                time.reset();
+                flickState++;
+            }
 
-                flicker.setPosition(outPos);
-            }else if(flickState % 2 == 1){
-                if(time.time() > flickerSpeed){
-                    time.reset();
-                    flickState++;
-                }
+            flicker.setPosition(outPos);
+        }else if(flickState % 2 == 1){
+            if(time.time() > flickerSpeed){
+                time.reset();
+                flickState++;
+            }
 
-                flicker.setPosition(inPos);
+            flicker.setPosition(inPos);
 
-                if(flickState == 5){
-                    flickState = 0;
-                    flick = false;
-                }
+            if(flickState == 5){
+                flickState = 0;
+                flick = false;
             }
         }
     }
