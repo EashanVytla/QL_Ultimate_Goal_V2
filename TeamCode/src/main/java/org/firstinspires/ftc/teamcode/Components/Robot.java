@@ -23,6 +23,7 @@ public class Robot {
     public Shooter shooter;
     public Intake intake;
     public WobbleGoal wobbleGoal;
+    public Converter converter;
 
     public ExpansionHubEx hub1;
     public ExpansionHubEx hub2;
@@ -61,6 +62,7 @@ public class Robot {
         shooter = new Shooter(map, telemetry);
         intake = new Intake(map, telemetry);
         wobbleGoal = new WobbleGoal(map, telemetry);
+        converter = new Converter(map, telemetry);
 
         updateBulkData();
 
@@ -79,9 +81,10 @@ public class Robot {
 
         drive.driveCentric(gamepad1.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
 
-        shooter.operate(gamepad1, getData2());
+        shooter.operate(gamepad2, getData2());
         intake.operate(gamepad1);
         wobbleGoal.operate(gamepad1);
+        converter.operate(gamepad2);
 
         telemetry.addData("Robot Position:", getPos());
 
@@ -93,6 +96,7 @@ public class Robot {
         intake.write();
         shooter.write();
         wobbleGoal.write();
+        converter.write();
     }
 
     public static boolean isContinuous(){

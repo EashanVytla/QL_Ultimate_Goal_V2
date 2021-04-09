@@ -16,8 +16,10 @@ public class Shooter {
     public Flicker flicker;
     private Telemetry telemetry;
     private boolean first = true;
-    private boolean bToggle = false;
+    private boolean xToggle = false;
+    private boolean aToggle = false;
     private Caching_Servo flap;
+    private Caching_Servo rotator;
 
     private final double FLAP_MIN = 0.36;
     private final double FLAP_MAX = 0.42;
@@ -26,6 +28,7 @@ public class Shooter {
         motor = new Caching_Motor(map, "shooter");
         flicker = new Flicker(map, telemetry);
         flap = new Caching_Servo(map, "flap");
+        rotator = new Caching_Servo(map, "rotator");
         this.telemetry = telemetry;
     }
 
@@ -33,6 +36,7 @@ public class Shooter {
         flicker.write();
         motor.write();
         flap.write();
+        rotator.write();
     }
 
     public void startFlywheel(){
@@ -43,8 +47,18 @@ public class Shooter {
         motor.setPower(0.0);
     }
 
-    public void setFlap(double pos){
-        flap.setPosition(pos);
+    public void setFlap(double distance){
+        flap.setPosition(distance);
+    }
+
+    public void setRotator(double angle){
+        if(angle > 40){
+            angle = 40;
+        }
+        if(angle < -40){
+            angle = -40;
+        }
+        rotator.setPosition(angle);
     }
 
     public void setFlywheelPower(double value){
@@ -56,32 +70,35 @@ public class Shooter {
     }
 
     public void operate(GamepadEx gamepad, RevBulkData data){
-        if(Robot.isContinuous() && Intake.toggle){
-            startFlywheel();
-        }else if(!Robot.isContinuous()){
-            if(gamepad.isPress(GamepadEx.Control.a)){
+
+        if(gamepad.isPress(GamepadEx.Control.a)) {
+            aToggle = !aToggle;
+
+            if (aToggle) {
                 startFlywheel();
                 flicker.resetTime();
                 flicker.flick = true;
-            }
 
-            if(gamepad.isPress(GamepadEx.Control.b)){
-                bToggle = true;
-            }
-
-            if(flicker.flick){
-                if(bToggle){
-                    if(first){
-                        flicker.resetTime();
-                        first = false;
-                    }
-                    flicker.flick();
+                if (gamepad.isPress(GamepadEx.Control.x)) {
+                    xToggle = true;
                 }
-            }else{
-                bToggle = false;
-                stopFlywheel();
-                first = true;
+
+                if (flicker.flick) {
+                    if (xToggle) {
+                        if (first) {
+                            flicker.resetTime();
+                            first = false;
+                        }
+                        flicker.flick();
+                    }
+                } else {
+                    xToggle = false;
+                    stopFlywheel();
+                    first = true;
+                }
             }
+        } else {
+            setFlywheelPower(-0.4);
         }
 
         telemetry.addData("shooter velocity", getFlywheelVelcoity(data));

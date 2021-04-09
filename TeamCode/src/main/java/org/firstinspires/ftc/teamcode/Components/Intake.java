@@ -34,20 +34,17 @@ public class Intake {
     }
 
     public void operate(GamepadEx gamepad){
-        if(gamepad.isPress(GamepadEx.Control.right_trigger)){
+        if(gamepad.isPress(GamepadEx.Control.right_bumper)){
             toggle = !toggle;
             inverseToggle = false;
         }
 
-        if(gamepad.isPress(GamepadEx.Control.left_trigger)){
-            inverseToggle = !inverseToggle;
-            toggle = false;
-        }
 
-        if(toggle){
-            setPower(1.0);
-        }else if(inverseToggle){
+        if(gamepad.isPress(GamepadEx.Control.left_bumper)){
+            toggle = !toggle;
             setPower(-1.0);
+        }else if(toggle){
+            setPower(1.0);
         }else{
             setPower(0.0);
         }
