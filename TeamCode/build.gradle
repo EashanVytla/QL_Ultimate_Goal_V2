@@ -18,6 +18,7 @@ apply from: '../build.dependencies.gradle'
 repositories {
     maven { url = "https://maven.0x778.tk" }
     maven { url 'https://jitpack.io' }
+    maven { url = 'https://maven.brott.dev/'}
 }
 
 dependencies {
@@ -28,6 +29,7 @@ dependencies {
     implementation 'org.openftc:easyopencv:1.4.1'
 
     implementation 'com.acmerobotics.roadrunner:core:0.5.3'
-    implementation 'com.acmerobotics.dashboard:dashboard:0.4.0'
+    implementation 'com.acmerobotics.dashboard:dashboard:0.4.1'
     implementation 'com.spartronics4915.lib:ftc265:2.1.8'
+    implementation 'org.ejml:ejml-all:0.40'
 }

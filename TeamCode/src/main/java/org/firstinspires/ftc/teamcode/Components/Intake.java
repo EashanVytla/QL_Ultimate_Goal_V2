@@ -1,45 +1,55 @@
 package org.firstinspires.ftc.teamcode.Components;
 
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
-class Intake {
-    private Caching_Motor intake;
+public class Intake {
+    private Caching_Motor[] intake = new Caching_Motor[2];
     public static boolean toggle;
+    public boolean inverseToggle;
+    private Caching_Motor leveler;
 
     public Intake(HardwareMap map, Telemetry telemetry){
         toggle = false;
-        intake = new Caching_Motor(map, "intake");
-    }
+        intake[0] = new Caching_Motor(map, "intake_left");
+        intake[1] = new Caching_Motor(map, "intake_right");
 
-    public void start(){
-        intake.setPower(1.0);
-    }
+        leveler = new Caching_Motor(map, "leveler");
 
-    public void stop(){
-        intake.setPower(0.0);
+        intake[0].motor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void setPower(double power){
-        intake.setPower(power);
+        intake[0].setPower(power);
+        intake[1].setPower(power);
     }
 
     public void write(){
-        intake.write();
+        intake[0].write();
+        intake[1].write();
     }
 
     public void operate(GamepadEx gamepad){
-        if(gamepad.isPress(GamepadEx.Control.right_bumper)){
+        if(gamepad.isPress(GamepadEx.Control.right_trigger)){
             toggle = !toggle;
+            inverseToggle = false;
+        }
+
+        if(gamepad.isPress(GamepadEx.Control.left_trigger)){
+            inverseToggle = !inverseToggle;
+            toggle = false;
         }
 
         if(toggle){
-            start();
+            setPower(1.0);
+        }else if(inverseToggle){
+            setPower(-1.0);
         }else{
-            stop();
+            setPower(0.0);
         }
     }
 }
