@@ -1,36 +1,29 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.ejml.simple.SimpleMatrix;
+import org.firstinspires.ftc.teamcode.Components.Intake;
+import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
-@TeleOp (name = "Intake_Tester")
-public class Intake_Tester extends LinearOpMode {
-    final String name = "Intake";
+@TeleOp
+public class Intake_Tester extends OpMode {
+    private Intake intake;
+    private GamepadEx gamepadEx;
 
-    DcMotor motor;
-    HardwareMap map;
-    Telemetry telemetry;
-    Intake_Tester intake;
-
-    public Intake_Tester(HardwareMap map, Telemetry telemetry){
-        this.map = map;
-        this.telemetry = telemetry;
-        motor = map.get(DcMotor.class, name);
-    }
     @Override
-    public void runOpMode(){
-        intake = new Intake_Tester(hardwareMap, telemetry);
+    public void init() {
+        intake = new Intake(hardwareMap, telemetry);
+        gamepadEx = new GamepadEx(gamepad1);
+    }
 
-        waitForStart();
-        while(opModeIsActive()){
-            motor.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
+    @Override
+    public void loop() {
+        intake.operate(gamepadEx);
 
-            telemetry.addData("Power", motor.getPower());
-            telemetry.update();
-        }
+        intake.write();
+        gamepadEx.loop();
     }
 }

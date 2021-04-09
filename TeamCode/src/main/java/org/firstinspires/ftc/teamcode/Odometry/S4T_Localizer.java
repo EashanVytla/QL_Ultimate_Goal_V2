@@ -51,7 +51,7 @@ public class S4T_Localizer {
     public final Vector2d DASHBOARD_OFFSET_FROM_CENTER = new Vector2d(-48, -55);
 
     //T265 Camera Instance Variables:
-    private static T265Camera slamra;
+    //private static T265Camera slamra;
     public double move_power = 1.0;
     public double turn_power = 1.0;
 
@@ -71,7 +71,7 @@ public class S4T_Localizer {
         this.telemetry = telemetry;
         this.hardwareMap = map;
 
-        if(slamra == null){
+        /*if(slamra == null){
             try{
                 slamra = new T265Camera(OFFSET, odoCovariance, map.appContext);
             }catch (Exception e){
@@ -88,10 +88,10 @@ public class S4T_Localizer {
             if(!slamra.isStarted()){
                 slamra.start();
             }
-        }
+        }*/
     }
 
-    public Pose2d getT265Pose(double xVelo, double yVelo){
+    /*public Pose2d getT265Pose(double xVelo, double yVelo){
         if(slamra == null){
             telemetry.addData("IT IS NULL", "IT IS NULL");
             try{
@@ -116,7 +116,7 @@ public class S4T_Localizer {
 
             return new Pose2d(translation.getX(), translation.getX(), rotation.getRadians());
         }
-    }
+    }*/
 
     public double wf = 1;
     public double ws = 1;
@@ -163,6 +163,31 @@ public class S4T_Localizer {
         myPose = new Pose2d(myPose.getX(), myPose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
         dashboardPos = new Pose2d(myPose.getY() + DASHBOARD_OFFSET_FROM_CENTER.getY(), -myPose.getX() + DASHBOARD_OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - myPose.getHeading());
+    }
+
+    private double absoluteHeading = 0;
+
+    public double getAbsoluteHeading(double elxRaw, double elyRaw, double erxRaw, double eryRaw){
+        double y = ((elyRaw + eryRaw)/2) / TICKS_TO_INCHES_VERT;
+        double x = ((elxRaw + erxRaw)/2) / TICKS_TO_INCHES_STRAFE;
+        double dy = y - prevy;
+        double dx = x - prevx;
+
+        prevx = x;
+        prevy = y;
+
+        double dElyRaw = elyRaw - prevelyRaw;
+        double dEryRaw = eryRaw - preveryRaw;
+        double dElxRaw = elxRaw - prevelxRaw;
+        double dErxRaw = erxRaw - preverxRaw;
+
+        double dthetastrafe = (dErxRaw - dElxRaw) / TRACK_WIDTH2;
+        double dthetavert = (dEryRaw - dElyRaw) / TRACK_WIDTH1;
+
+        double dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
+        absoluteHeading += dtheta;
+
+        return absoluteHeading;
     }
 
     public void reset(){

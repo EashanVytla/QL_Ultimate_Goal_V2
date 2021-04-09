@@ -6,13 +6,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Components.Robot;
-import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @TeleOp
 public class Servo_Tester extends LinearOpMode {
     //Set the hardware mapping name of the servo
-    final String name = "flicker";
+    final String name = "wobble_lift";
 
     Robot robot;
     Servo servo;
@@ -40,11 +39,11 @@ public class Servo_Tester extends LinearOpMode {
             }else{
                 if (gamepad1.dpad_up) {
                     if(pos < 1){
-                        pos += 0.001;
+                        pos += 0.0005;
                     }
                 } else if (gamepad1.dpad_down){
                     if(pos > 0){
-                        pos -= 0.001;
+                        pos -= 0.0005;
                     }
                 }
 

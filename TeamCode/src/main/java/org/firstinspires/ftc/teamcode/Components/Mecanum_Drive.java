@@ -99,6 +99,13 @@ public class Mecanum_Drive{
         motors[3].setPower(backRightMotorPower);
     }
 
+    public void setPower(double UpLeft, double BackLeft, double UpRight, double BackRight){
+        motors[0].setPower(UpLeft);
+        motors[1].setPower(UpRight);
+        motors[2].setPower(BackLeft);
+        motors[3].setPower(BackRight);
+    }
+
     public void setPower(Vector2 vec, double rot){
         setPower(vec.x, vec.y, rot);
     }
