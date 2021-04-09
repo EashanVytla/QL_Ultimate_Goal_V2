@@ -165,7 +165,10 @@ public class MPCSolver {
             try {
                 SimpleMatrix inverse = getLqrSolver().getInputCost().plus(B.transpose().mult(getP()[timeStep].mult(B))).invert();
                 K = inverse.mult(B.transpose()).mult(getP()[timeStep]).mult(A).negative();
-                Log.i("LQR SOLVER EQUATION", getLqrSolver().limitInput(getSimulatedInputs()[timeStep].plus(K.mult(state.minus(getSimulatedStates()[timeStep])))).toString());
+
+                Log.i("RETURNED MPC", getLqrSolver().limitInput(getSimulatedInputs()[timeStep].plus(K.mult(state.minus(getSimulatedStates()[timeStep]))).minus(
+                        getLqrSolver().getInputCost().plus(getB()[timeStep].transpose().mult(getP()[timeStep])
+                                .mult(B)).invert().mult(B.transpose()).mult(getL()[timeStep]).scale(1 / 2d))).toString());
                 return getLqrSolver().limitInput(getSimulatedInputs()[timeStep].plus(K.mult(state.minus(getSimulatedStates()[timeStep]))).minus(
                         getLqrSolver().getInputCost().plus(getB()[timeStep].transpose().mult(getP()[timeStep])
                                 .mult(B)).invert().mult(B.transpose()).mult(getL()[timeStep]).scale(1 / 2d)));

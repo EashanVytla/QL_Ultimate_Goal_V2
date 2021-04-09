@@ -19,8 +19,8 @@ public class Shooter {
     private boolean bToggle = false;
     private Caching_Servo flap;
 
-    //.42 max
-    //.36 straight
+    private final double FLAP_MIN = 0.36;
+    private final double FLAP_MAX = 0.42;
 
     public Shooter(HardwareMap map, Telemetry telemetry){
         motor = new Caching_Motor(map, "shooter");

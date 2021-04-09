@@ -22,6 +22,7 @@ public class Robot {
     public Mecanum_Drive drive;
     public Shooter shooter;
     public Intake intake;
+    public WobbleGoal wobbleGoal;
 
     public ExpansionHubEx hub1;
     public ExpansionHubEx hub2;
@@ -59,6 +60,7 @@ public class Robot {
         drive = new Mecanum_Drive(map, telemetry);
         shooter = new Shooter(map, telemetry);
         intake = new Intake(map, telemetry);
+        wobbleGoal = new WobbleGoal(map, telemetry);
 
         updateBulkData();
 
@@ -79,6 +81,7 @@ public class Robot {
 
         shooter.operate(gamepad1, getData2());
         intake.operate(gamepad1);
+        wobbleGoal.operate(gamepad1);
 
         telemetry.addData("Robot Position:", getPos());
 
@@ -89,6 +92,7 @@ public class Robot {
         drive.write();
         intake.write();
         shooter.write();
+        wobbleGoal.write();
     }
 
     public static boolean isContinuous(){

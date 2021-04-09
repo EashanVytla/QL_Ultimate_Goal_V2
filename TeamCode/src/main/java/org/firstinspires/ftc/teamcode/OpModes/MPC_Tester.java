@@ -153,10 +153,9 @@ public class MPC_Tester extends LinearOpMode {
                     mpcSolver = updatedController;
                 }
 
-                telemetry.addData("MPC Solver", mpcSolver.toString());
-
                 try {
                     input = mpcSolver.getOptimalInput(runnableMPC.controllerElapsedTime(), state);
+                    telemetry.addData("IMPORTANT", mpcSolver.getOptimalInput(runnableMPC.controllerElapsedTime(), state));
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
