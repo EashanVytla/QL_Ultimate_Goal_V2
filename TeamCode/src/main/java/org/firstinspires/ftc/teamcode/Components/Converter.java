@@ -33,4 +33,8 @@ public class Converter {
             }
         }
     }
+
+    public void tickValue(){
+        telemetry.addData("Tick Value", motor.getCurrentPosition());
+    }
 }

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Components;
 import android.graphics.Bitmap;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -42,6 +43,7 @@ public class Robot {
     OpenCvCamera webcam;
     RingDetectionPipelineV2 detector;
     Pose2d startPos = new Pose2d(0, 0, 0);
+    public final Vector2d ULTIMATE_GOAL_POS = new Vector2d(3, 136);
     private static boolean continuousMode = false;
 
     public Robot(HardwareMap map, Telemetry telemetry){

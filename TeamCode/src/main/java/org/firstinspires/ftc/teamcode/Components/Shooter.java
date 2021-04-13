@@ -13,22 +13,22 @@ import kotlin.text.CharDirectionality;
 
 public class Shooter {
     private Caching_Motor motor;
+    Robot robot;
     public Flicker flicker;
     private Telemetry telemetry;
     private boolean first = true;
     private boolean xToggle = false;
     private boolean aToggle = false;
     private Caching_Servo flap;
-    private Caching_Servo rotator;
 
     private final double FLAP_MIN = 0.36;
-    private final double FLAP_MAX = 0.42;
+    private final double FLAP_MAX = (FLAP_MIN + 0.06);
 
     public Shooter(HardwareMap map, Telemetry telemetry){
+        robot = new Robot(map,telemetry);
         motor = new Caching_Motor(map, "shooter");
         flicker = new Flicker(map, telemetry);
         flap = new Caching_Servo(map, "flap");
-        rotator = new Caching_Servo(map, "rotator");
         this.telemetry = telemetry;
     }
 
@@ -36,7 +36,6 @@ public class Shooter {
         flicker.write();
         motor.write();
         flap.write();
-        rotator.write();
     }
 
     public void startFlywheel(){
@@ -48,18 +47,11 @@ public class Shooter {
     }
 
     public void setFlap(double distance){
+        double function;
+
         flap.setPosition(distance);
     }
 
-    public void setRotator(double angle){
-        if(angle > 40){
-            angle = 40;
-        }
-        if(angle < -40){
-            angle = -40;
-        }
-        rotator.setPosition(angle);
-    }
 
     public void setFlywheelPower(double value){
         motor.setPower(value);
