@@ -33,7 +33,7 @@ public class Intake_Tester extends OpMode {
         }
 
         if(toggle){
-            shooter.setFlywheelPower(-1.0);
+            shooter.startFlywheel();
         } else {
             shooter.stopFlywheel();
         }
