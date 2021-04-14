@@ -66,6 +66,8 @@ public class Robot {
         wobbleGoal = new WobbleGoal(map, telemetry);
         converter = new Converter(map, telemetry);
 
+
+
         updateBulkData();
 
         localizer = new S4T_Localizer(hardwareMap, telemetry);
@@ -75,13 +77,15 @@ public class Robot {
         shooter.flicker.start();
     }
 
-    public void operate(GamepadEx gamepad1, GamepadEx gamepad2){
+    public void operate(GamepadEx gamepad1, GamepadEx gamepad2) {
         updateBulkData();
 
-        if(gamepad1.isPress(GamepadEx.Control.dpad_left))
+        if (gamepad1.isPress(GamepadEx.Control.dpad_left)) {
             continuousMode = !continuousMode;
+    }
 
-        drive.driveCentric(gamepad1.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
+
+       drive.driveCentric(gamepad1.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
 
         shooter.operate(gamepad2, getData2());
         intake.operate(gamepad1);
@@ -98,7 +102,9 @@ public class Robot {
         intake.write();
         shooter.write();
         wobbleGoal.write();
-        converter.write();
+        //converter.write();
+
+
     }
 
     public static boolean isContinuous(){

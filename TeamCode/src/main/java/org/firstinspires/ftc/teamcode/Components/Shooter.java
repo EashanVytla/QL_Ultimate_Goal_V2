@@ -13,7 +13,6 @@ import kotlin.text.CharDirectionality;
 
 public class Shooter {
     private Caching_Motor motor;
-    Robot robot;
     public Flicker flicker;
     private Telemetry telemetry;
     private boolean first = true;
@@ -25,7 +24,6 @@ public class Shooter {
     private final double FLAP_MAX = (FLAP_MIN + 0.06);
 
     public Shooter(HardwareMap map, Telemetry telemetry){
-        robot = new Robot(map,telemetry);
         motor = new Caching_Motor(map, "shooter");
         flicker = new Flicker(map, telemetry);
         flap = new Caching_Servo(map, "flap");
