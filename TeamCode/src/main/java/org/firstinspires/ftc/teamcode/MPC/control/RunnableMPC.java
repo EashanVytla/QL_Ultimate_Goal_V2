@@ -70,6 +70,10 @@ public class RunnableMPC implements Runnable {
         return mpc;
     }
 
+    public void resetTimer(){
+        getTimeProfiler().reset();
+    }
+
     @Override
     public void run() {
         getTimeProfiler().start();

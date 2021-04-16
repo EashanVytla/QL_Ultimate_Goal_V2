@@ -15,8 +15,7 @@ public class Caching_Motor {
     double query = -2.0;
 
     float pos = 0;
-
-    double EPSILON = 0.01;
+    double EPSILON = 0.0075;
 
     double prev_write = 0;
     double current_write = 0;

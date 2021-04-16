@@ -18,9 +18,9 @@ import org.openftc.revextensions2.RevBulkData;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 2762.221712973584;
+    public static double TRACK_WIDTH1 = 2763.721712973584;//2762.221712973584;
 
-    public static double TRACK_WIDTH2 = 2434.8826022248963;
+    public static double TRACK_WIDTH2 = 2436.3826022248963;//2434.8826022248963;
 
     private final double EPSILON = 1e-6;
     private static Pose2d myPose = new Pose2d(0, 0, 0);
@@ -122,6 +122,7 @@ public class S4T_Localizer {
     public double ws = 1;
     double dtheta = 0;
     public Pose2d dashboardPos = new Pose2d(0, 0, 0);
+    private double absoluteHeading = 0;
 
     public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw, double xVelo, double yVelo, RevBulkData data){
         double y = ((elyRaw + eryRaw)/2) / TICKS_TO_INCHES_VERT;
@@ -151,10 +152,14 @@ public class S4T_Localizer {
         double dthetavert = (dEryRaw - dElyRaw) / TRACK_WIDTH1;
 
         dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
+        absoluteHeading += dtheta;
         heading %= 2 * Math.PI;
 
         heading += dtheta;
         heading %= 2 * Math.PI;
+
+        telemetry.addData("Vertical Heading", Math.toDegrees(((eryRaw - elyRaw) / TRACK_WIDTH1) % (2 * Math.PI)));
+        telemetry.addData("Strafe Heading", Math.toDegrees(((erxRaw - elxRaw) / TRACK_WIDTH2) % (2 * Math.PI)));
 
         Vector2 myVec = ConstantVelo(dy, dx, prevHeading, dtheta);
         prevHeading = heading;
@@ -165,28 +170,7 @@ public class S4T_Localizer {
         dashboardPos = new Pose2d(myPose.getY() + DASHBOARD_OFFSET_FROM_CENTER.getY(), -myPose.getX() + DASHBOARD_OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - myPose.getHeading());
     }
 
-    private double absoluteHeading = 0;
-
-    public double getAbsoluteHeading(double elxRaw, double elyRaw, double erxRaw, double eryRaw){
-        double y = ((elyRaw + eryRaw)/2) / TICKS_TO_INCHES_VERT;
-        double x = ((elxRaw + erxRaw)/2) / TICKS_TO_INCHES_STRAFE;
-        double dy = y - prevy;
-        double dx = x - prevx;
-
-        prevx = x;
-        prevy = y;
-
-        double dElyRaw = elyRaw - prevelyRaw;
-        double dEryRaw = eryRaw - preveryRaw;
-        double dElxRaw = elxRaw - prevelxRaw;
-        double dErxRaw = erxRaw - preverxRaw;
-
-        double dthetastrafe = (dErxRaw - dElxRaw) / TRACK_WIDTH2;
-        double dthetavert = (dEryRaw - dElyRaw) / TRACK_WIDTH1;
-
-        double dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
-        absoluteHeading += dtheta;
-
+    public double getAbsoluteHeading(){
         return absoluteHeading;
     }
 

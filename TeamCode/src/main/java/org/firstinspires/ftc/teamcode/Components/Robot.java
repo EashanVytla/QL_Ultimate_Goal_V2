@@ -179,14 +179,6 @@ public class Robot {
         localizer.update(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist(), getVelocityX(), getVelocityY(), data);
     }
 
-    public double getAbsoluteHeading(){
-        encoderLX.update(data);
-        encoderLY.update(data);
-        encoderRX.update(data);
-        encoderRY.update(data);
-        return localizer.getAbsoluteHeading(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
-    }
-
     public double getLeft_X_Dist(){
         return encoderLX.getDist();
     }

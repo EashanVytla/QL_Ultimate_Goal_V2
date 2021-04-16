@@ -25,6 +25,10 @@ public class LinearTeleOp extends LinearOpMode {
         while(opModeIsActive() && !isStopRequested()){
             robot.operate(gamepad1ex, gamepad2ex);
 
+            telemetry.addData("Y button", gamepad1ex.isPress(GamepadEx.Control.y));
+
+            telemetry.addData("Y Power", gamepad1ex.gamepad.left_stick_x);
+
             telemetry.update();
         }
     }

@@ -153,12 +153,12 @@ public class MPCSolver {
     }
 
     public SimpleMatrix getOptimalInput(double timeStamp, SimpleMatrix state) throws InvalidDynamicModelException {
-        return getOptimalInput((int)(timeStamp / getLqrSolver().getDt()), state);
+        SimpleMatrix matrix = getOptimalInput((int)(timeStamp / getLqrSolver().getDt()), state);
+        return matrix;
     }
 
     public SimpleMatrix getOptimalInput(int timeStep, SimpleMatrix state) throws InvalidDynamicModelException {
         if(getSimulatedInputs() != null && getP() != null && timeStep < getSimulatedInputs().length - 1) {
-            Log.i("MPC ERROR", "Flag2");
             SimpleMatrix A = getLqrSolver().getA(state);
             SimpleMatrix B = getLqrSolver().getB(state);
             SimpleMatrix K;
@@ -166,9 +166,6 @@ public class MPCSolver {
                 SimpleMatrix inverse = getLqrSolver().getInputCost().plus(B.transpose().mult(getP()[timeStep].mult(B))).invert();
                 K = inverse.mult(B.transpose()).mult(getP()[timeStep]).mult(A).negative();
 
-                Log.i("RETURNED MPC", getLqrSolver().limitInput(getSimulatedInputs()[timeStep].plus(K.mult(state.minus(getSimulatedStates()[timeStep]))).minus(
-                        getLqrSolver().getInputCost().plus(getB()[timeStep].transpose().mult(getP()[timeStep])
-                                .mult(B)).invert().mult(B.transpose()).mult(getL()[timeStep]).scale(1 / 2d))).toString());
                 return getLqrSolver().limitInput(getSimulatedInputs()[timeStep].plus(K.mult(state.minus(getSimulatedStates()[timeStep]))).minus(
                         getLqrSolver().getInputCost().plus(getB()[timeStep].transpose().mult(getP()[timeStep])
                                 .mult(B)).invert().mult(B.transpose()).mult(getL()[timeStep]).scale(1 / 2d)));

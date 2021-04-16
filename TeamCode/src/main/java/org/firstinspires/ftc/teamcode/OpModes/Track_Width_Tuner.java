@@ -79,6 +79,8 @@ public class Track_Width_Tuner extends LinearOpMode {
             telemetry.addData("Right Y RAW", robot.getRawRight_Y_Dist());
             telemetry.addData("Left Y RAW", robot.getRawLeft_Y_Dist());
 
+            telemetry.addData("Absolute Heading", robot.localizer.getAbsoluteHeading());
+
             double dt = (SystemClock.uptimeMillis() - prevTime)/1000.0;
             packet.put("Refresh rate", 1/dt);
             prevTime = SystemClock.uptimeMillis();
