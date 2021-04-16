@@ -66,7 +66,7 @@ public class Shooter {
             if (aToggle) {
                 startFlywheel();
 
-                if (Robot.isContinuous()) {
+                if (!Robot.isContinuous()) {
                     flicker.resetTime();
                     flicker.flick = true;
 
@@ -88,9 +88,9 @@ public class Shooter {
                         first = true;
                     }
                 }
+            }else{
+                setFlywheelPower(-0.4);
             }
-        } else {
-            setFlywheelPower(-0.4);
         }
 
         telemetry.addData("A toggle", aToggle);
