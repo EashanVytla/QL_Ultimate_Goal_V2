@@ -50,7 +50,7 @@ public class Robot {
         this.hardwareMap = map;
         this.telemetry = telemetry;
 
-        continuousMode = false;
+        continuousMode = true;
 
         hub1 = map.get(ExpansionHubEx.class, "Expansion Hub 173");
         hub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
@@ -82,10 +82,9 @@ public class Robot {
 
         if (gamepad1.isPress(GamepadEx.Control.dpad_left)) {
             continuousMode = !continuousMode;
-    }
+        }
 
-
-       drive.driveCentric(gamepad1.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
+        drive.driveCentric(gamepad1.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
 
         shooter.operate(gamepad2, getData2());
         intake.operate(gamepad1);
@@ -103,8 +102,6 @@ public class Robot {
         shooter.write();
         wobbleGoal.write();
         //converter.write();
-
-
     }
 
     public static boolean isContinuous(){

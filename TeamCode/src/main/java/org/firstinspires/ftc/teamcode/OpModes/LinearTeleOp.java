@@ -34,7 +34,7 @@ public class LinearTeleOp extends LinearOpMode {
 
         while(opModeIsActive()){
             robot.operate(gamepad1ex, gamepad2ex);
-            setRotator(robot.getPos().getY(), robot.getPos().getX(), robot.getPos().getHeading());
+            //setRotator(robot.getPos().getY(), robot.getPos().getX(), robot.getPos().getHeading());
             robot.converter.tickValue();
 
             telemetry.addData("Odo", robot.getPos().getY());

@@ -60,7 +60,6 @@ public class Shooter {
     }
 
     public void operate(GamepadEx gamepad, RevBulkData data){
-
         if(gamepad.isPress(GamepadEx.Control.a)) {
             aToggle = !aToggle;
 
@@ -90,6 +89,8 @@ public class Shooter {
         } else {
             setFlywheelPower(-0.4);
         }
+
+        telemetry.addData("A toggle", aToggle);
 
         telemetry.addData("shooter velocity", getFlywheelVelcoity(data));
     }

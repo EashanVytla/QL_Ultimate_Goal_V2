@@ -35,8 +35,7 @@ public class Intake {
             toggle = !toggle;
         }
 
-        if(gamepad.isPress(GamepadEx.Control.left_bumper)){
-            toggle = false;
+        if(gamepad.gamepad.left_bumper){
             setPower(-1.0);
         } else if (toggle) {
             setPower(1.0);
