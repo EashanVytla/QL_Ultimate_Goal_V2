@@ -80,7 +80,7 @@ public class Robot {
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2) {
         updateBulkData();
 
-        if (gamepad1.isPress(GamepadEx.Control.dpad_left)) {
+        if (gamepad2.isPress(GamepadEx.Control.dpad_left)) {
             continuousMode = !continuousMode;
         }
 
