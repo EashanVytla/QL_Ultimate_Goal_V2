@@ -65,25 +65,28 @@ public class Shooter {
 
             if (aToggle) {
                 startFlywheel();
-                flicker.resetTime();
-                flicker.flick = true;
 
-                if (gamepad.isPress(GamepadEx.Control.x)) {
-                    xToggle = true;
-                }
+                if (Robot.isContinuous()) {
+                    flicker.resetTime();
+                    flicker.flick = true;
 
-                if (flicker.flick) {
-                    if (xToggle) {
-                        if (first) {
-                            flicker.resetTime();
-                            first = false;
-                        }
-                        flicker.flick();
+                    if (gamepad.isPress(GamepadEx.Control.x)) {
+                        xToggle = true;
                     }
-                } else {
-                    xToggle = false;
-                    stopFlywheel();
-                    first = true;
+
+                    if (flicker.flick) {
+                        if (xToggle) {
+                            if (first) {
+                                flicker.resetTime();
+                                first = false;
+                            }
+                            flicker.flick();
+                        }
+                    } else {
+                        xToggle = false;
+                        stopFlywheel();
+                        first = true;
+                    }
                 }
             }
         } else {
