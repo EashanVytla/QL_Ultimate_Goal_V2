@@ -80,16 +80,16 @@ public class Robot {
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2) {
         updateBulkData();
 
-        if (gamepad2.isPress(GamepadEx.Control.dpad_left)) {
+        if (gamepad1.isPress(GamepadEx.Control.dpad_left)) {
             continuousMode = !continuousMode;
         }
 
         drive.driveCentric(gamepad1.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
 
-        shooter.operate(gamepad2, getData2());
+        shooter.operate(gamepad1, getData2());
         intake.operate(gamepad1);
         wobbleGoal.operate(gamepad1);
-        converter.operate(gamepad2);
+        converter.operate(gamepad1);
 
         telemetry.addData("Robot Position:", getPos());
 
