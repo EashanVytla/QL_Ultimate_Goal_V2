@@ -20,7 +20,7 @@ public class Servo_Tester extends LinearOpMode {
 
     @Override
     public void runOpMode(){
-        gamepadEx = new GamepadEx(gamepad1);
+        gamepadEx = new GamepadEx(gamepad2);
         servo = hardwareMap.servo.get(name);
         pos = ServoTester.pos;
 
@@ -61,5 +61,5 @@ public class Servo_Tester extends LinearOpMode {
 @Config
 class ServoTester{
     //Set the set/start position of the servo in dashboard
-    public static double pos = 0.0;
+    public static double pos = 0.6;
 }
