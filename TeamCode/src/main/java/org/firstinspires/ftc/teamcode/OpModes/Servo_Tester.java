@@ -11,9 +11,8 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 @TeleOp
 public class Servo_Tester extends LinearOpMode {
     //Set the hardware mapping name of the servo
-    final String name = "wobble_lift";
+    final String name = "rotator";
 
-    Robot robot;
     Servo servo;
     private double pos;
     GamepadEx gamepadEx;
@@ -21,8 +20,7 @@ public class Servo_Tester extends LinearOpMode {
 
     @Override
     public void runOpMode(){
-        gamepadEx = new GamepadEx(gamepad1);
-        robot = new Robot(hardwareMap, telemetry);
+        gamepadEx = new GamepadEx(gamepad2);
         servo = hardwareMap.servo.get(name);
         pos = ServoTester.pos;
 
@@ -63,5 +61,5 @@ public class Servo_Tester extends LinearOpMode {
 @Config
 class ServoTester{
     //Set the set/start position of the servo in dashboard
-    public static double pos = 0.0;
+    public static double pos = 0.6;
 }

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -28,8 +29,6 @@ public class Flicker_Tester extends OpMode {
     @Override
     public void loop() {
         RevBulkData data = hub.getBulkInputData();
-
-        shooter.operate(gamepadEx, data);
 
         shooter.write();
         gamepadEx.loop();
