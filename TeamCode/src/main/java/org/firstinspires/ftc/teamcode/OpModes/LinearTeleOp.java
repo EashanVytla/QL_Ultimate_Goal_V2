@@ -13,12 +13,16 @@ public class LinearTeleOp extends LinearOpMode {
     GamepadEx gamepad1ex;
     GamepadEx gamepad2ex;
 
+    double kStrafe = 1.0;
+    double kVert = 1.0;
 
     @Override
     public void runOpMode(){
         robot = new Robot(hardwareMap, telemetry);
         shooter = new Shooter(hardwareMap, telemetry);
 
+        robot.localizer.k_strafe = kStrafe;
+        robot.localizer.k_vert = kVert;
 
         robot.localizer.reset();
         gamepad1ex = new GamepadEx(gamepad1);

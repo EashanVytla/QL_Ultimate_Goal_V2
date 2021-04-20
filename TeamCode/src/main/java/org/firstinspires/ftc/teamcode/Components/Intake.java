@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Components;
 
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -10,14 +9,13 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class Intake {
     private Caching_Motor[] intake = new Caching_Motor[2];
-    public static boolean toggle;
+    public boolean toggle;
+    public static boolean isOff = true;
 
     public Intake(HardwareMap map, Telemetry telemetry){
         toggle = false;
         intake[0] = new Caching_Motor(map, "intake_left");
         intake[1] = new Caching_Motor(map, "intake_right");
-
-        //intake[0].motor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void setPower(double power){
@@ -30,16 +28,20 @@ public class Intake {
         intake[1].write();
     }
 
+
     public void operate(GamepadEx gamepad){
         if(gamepad.isPress(GamepadEx.Control.right_bumper)){
             toggle = !toggle;
         }
 
         if(gamepad.gamepad.left_bumper){
+            isOff = false;
             setPower(-1.0);
-        } else if (toggle) {
+        }else if(toggle){
+            isOff = false;
             setPower(1.0);
-        } else {
+        }else{
+            isOff = true;
             setPower(0.0);
         }
     }

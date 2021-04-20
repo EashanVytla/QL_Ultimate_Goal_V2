@@ -37,10 +37,10 @@ public class Mecanum_Drive{
     PIDFController PID_Z_MPC;
 
     public static double kp = 0.2;
-    public static double ki = 0;
-    public static double kd = 0.01;
+    public static double ki = 0.0;
+    public static double kd = 0.03;
 
-    public static double kpr = 3.5;
+    public static double kpr = 2.75;
     public static double kir = 0;
     public static double kdr = 0.15;
 
@@ -175,10 +175,10 @@ public class Mecanum_Drive{
         setPowerCentic(PID_X.update(currentPos.getX()), -PID_Y.update(currentPos.getY()), PID_Z.update(heading), currentPos.getHeading());
     }
 
-    public void goToPointFF(Pose2d targetPos, Pose2d currentPos, double maxmovespeed, double maxturnspeed, double FLff, double BLff, double FRff, double BRff) {
-        PID_X_MPC.setOutputBounds(-maxmovespeed, maxmovespeed);
+    public void goToPointFF(Pose2d targetPos, Pose2d currentPos, double maxPow, double FLff, double BLff, double FRff, double BRff) {
+        /*PID_X_MPC.setOutputBounds(-maxmovespeed, maxmovespeed);
         PID_Y_MPC.setOutputBounds(-maxmovespeed, maxmovespeed);
-        PID_Z_MPC.setOutputBounds(-maxturnspeed, maxturnspeed);
+        PID_Z_MPC.setOutputBounds(-maxturnspeed, maxturnspeed);*/
 
         double heading = 0;
         double target_heading = targetPos.getHeading();
@@ -219,10 +219,10 @@ public class Mecanum_Drive{
         double y = Range.clip(PID_Y_MPC.update(currentPos.getY()), -1.0, 1.0);
         double z = Range.clip(PID_Z_MPC.update(heading), -1.0, 1.0);
 
-        setPowerFeedforwardCentric(x, y, z, currentPos.getHeading(), FLff, BLff, FRff, BRff);
+        setPowerFeedforwardCentric(x, y, z, currentPos.getHeading(), maxPow, FLff, BLff, FRff, BRff);
     }
 
-    public void setPowerFeedforwardCentric(double x, double y, double rot, double heading, double FLff, double BLff, double FRff, double BRff) {
+    public void setPowerFeedforwardCentric(double x, double y, double rot, double heading, double maxPow, double FLff, double BLff, double FRff, double BRff) {
         Vector2d powers = new Vector2d(x, y).rotated(heading);
 
         double FrontLeftVal = powers.getY() + powers.getX() + rot;
@@ -230,6 +230,6 @@ public class Mecanum_Drive{
         double BackLeftVal = powers.getY() - powers.getX() + rot;
         double BackRightVal = powers.getY() + powers.getX() - rot;
 
-        setPower(FrontLeftVal + FLff, BackLeftVal + BLff, FrontRightVal + FRff, BackRightVal + BRff);
+        setPower(Range.clip(FrontLeftVal + FLff, -maxPow, maxPow), Range.clip(BackLeftVal + BLff, -maxPow, maxPow), Range.clip(FrontRightVal + FRff, -maxPow, maxPow), Range.clip(BackRightVal + BRff, -maxPow, maxPow));
     }
 }

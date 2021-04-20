@@ -18,9 +18,9 @@ import org.openftc.revextensions2.RevBulkData;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 2763.721712973584;//2762.221712973584;
+    public static double TRACK_WIDTH1 = 2766.5903757664166216705064587044;//2762.221712973584;
 
-    public static double TRACK_WIDTH2 = 2436.3826022248963;//2434.8826022248963;
+    public static double TRACK_WIDTH2 = 2437.2590097735121981307437313458;//2434.8826022248963;
 
     private final double EPSILON = 1e-6;
     private static Pose2d myPose = new Pose2d(0, 0, 0);
@@ -41,8 +41,8 @@ public class S4T_Localizer {
 
     public double heading = 0;
     Telemetry telemetry;
-    public static double k_strafe = 0.5;
-    public static double k_vert = 1.0;
+    public double k_strafe = 0.5;
+    public double k_vert = 1.0;
     public double TICKS_TO_INCHES_VERT = 201.67339734597755609;
     public double TICKS_TO_INCHES_STRAFE = 335.381388888888888;
 
@@ -233,13 +233,11 @@ public class S4T_Localizer {
         if(mydx != 0) {
             wf = Math.pow(Math.E, -k_strafe * Math.abs(mydx));
         }
-        wf = 1.0;
 
         //If dy is high, ws is lower and vice versa
         if(mydy != 0) {
             ws = Math.pow(Math.E, -k_vert * Math.abs(mydy));
         }
-        ws = 0.0;
 
         prevdx = dx;
         prevdy = dy;

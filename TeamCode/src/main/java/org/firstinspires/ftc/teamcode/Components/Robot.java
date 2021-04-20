@@ -84,7 +84,9 @@ public class Robot {
         shooter.flicker.start();
     }
 
-    boolean test = false;
+    public void resetShooterPID(){
+        shooter.reset();
+    }
 
     public void operate(GamepadEx gamepad1ex, GamepadEx gamepad2ex) {
         updateBulkData();
@@ -98,14 +100,8 @@ public class Robot {
 
         shooter.operate(gamepad1ex, getPos(), getData2(), packet);
         intake.operate(gamepad1ex);
-        wobbleGoal.operate(gamepad1ex);
+        wobbleGoal.operate(gamepad1ex, gamepad2ex);
         converter.operate(gamepad1ex);
-
-        if (gamepad2ex.isPress(GamepadEx.Control.a)) {
-            test = !test;
-        }
-
-        telemetry.addData("Gamepad 2", test);
 
         telemetry.addData("Robot Position:", getPos());
 

@@ -11,10 +11,10 @@ public class WobbleGoal {
     public final double clamp_pos = 0.178;
     public final double grabber_idle = 0.489;
     public final double release_pos = 0.95;
-    public final double lift_pos = 0.69;
-    public final double drop_over_lift_pos = 0.55;
-    public final double auto_lift_pos = 0.36;
-    public final double down_pos = 0.25;
+    public final double lift_pos = 0.3475;
+    public final double drop_over_lift_pos = 0.223;
+    public final double auto_lift_pos = 0.15;
+    public final double down_pos = 0.05;
 
     public Caching_Servo servo_lift;
     public Caching_Servo servo_grab;
@@ -70,8 +70,8 @@ public class WobbleGoal {
         servo_lift.setPosition(drop_over_lift_pos);
     }
 
-    public void operate(GamepadEx gamepad){
-        if(gamepad.isPress(GamepadEx.Control.left_stick_button)){
+    public void operate(GamepadEx gamepad, GamepadEx gamepad2){
+        if(gamepad.isPress(GamepadEx.Control.right_stick_button)){
             grabberToggle = !grabberToggle;
 
             if(grabberToggle){
@@ -81,7 +81,7 @@ public class WobbleGoal {
             }
         }
 
-        if(gamepad.isPress(GamepadEx.Control.right_stick_button)){
+        if(gamepad2.isPress(GamepadEx.Control.left_stick_button)){
             if(grabberLiftToggle == 0){
                 down();
             }/*else if(grabberLiftToggle == 1){

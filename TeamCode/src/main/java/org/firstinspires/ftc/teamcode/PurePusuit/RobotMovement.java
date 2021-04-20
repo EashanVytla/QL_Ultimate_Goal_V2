@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.PurePusuit;
 
 
+import android.util.Log;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Components.Robot;
@@ -23,7 +26,6 @@ public class RobotMovement {
                 followMe = allPoints.get(allPoints.size() - 1);
             }else{
                 followMe = getFollowPointPath(allPoints, new Pose2d(robot.getPos().getX(), robot.getPos().getY(), robot.getPos().getHeading()), allPoints.get(index).followDistance);
-
             }
 
             index = getCurrentLine(followMe.toVec(), allPoints);
@@ -34,7 +36,7 @@ public class RobotMovement {
 
             robot.GoTo(followMe.x, followMe.y, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).heading, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).moveSpeed, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).moveSpeed, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).turnSpeed);
         }catch(Exception e){
-            System.out.println("Error: " + e);
+            Log.i("Pure Pursuit Error: ", e.toString());
         }
     }
 

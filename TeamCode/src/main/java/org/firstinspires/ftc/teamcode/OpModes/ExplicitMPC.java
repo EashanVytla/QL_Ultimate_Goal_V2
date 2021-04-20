@@ -28,17 +28,27 @@ public class ExplicitMPC extends LinearOpMode {
         TimeUtil.isUsingComputer = false;
     }
 
+    private ArrayList<Pose2d> desiredStates = new ArrayList<>();
+    int prevIndex = 0;
+
     @Override
     public void runOpMode() throws InterruptedException {
         ArrayList<Pose2d> positions = new ArrayList<>();
         ArrayList<Integer> timesteps = new ArrayList<>();
         ArrayList<SimpleMatrix> motorActuations = new ArrayList<>();
+        ArrayList<Integer> counters = new ArrayList<>();
         Robot robot = new Robot(hardwareMap, telemetry);
         robot.localizer.reset();
 
         TimeProfiler profiler;
 
         profiler = new TimeProfiler(false);
+
+        desiredStates.add(new Pose2d(-21, 56d, Math.toRadians(0)));
+        desiredStates.add(new Pose2d(14, 109d, Math.toRadians(360 - 45d)));
+        desiredStates.add(new Pose2d(1, 15, Math.toRadians(0d)));
+        desiredStates.add(new Pose2d(14, 109, Math.toRadians(360 - 45d)));
+        desiredStates.add(new Pose2d(-10, 69, Math.toRadians(0d)));
 
         BufferedReader bufReader = null;
         try {
@@ -63,6 +73,7 @@ public class ExplicitMPC extends LinearOpMode {
 
                     Pose2d pose = new Pose2d(Double.parseDouble(poseString[0]), Double.parseDouble(poseString[1]), Double.parseDouble(poseString[2]));
 
+                    counters.add(Integer.parseInt(values[3]));
                     positions.add(pose);
                     timesteps.add(timestep);
                     motorActuations.add(ff);
@@ -82,6 +93,8 @@ public class ExplicitMPC extends LinearOpMode {
 
         telemetry.addData("Ready to start", "Ready to start");
         telemetry.update();
+        int state = 0;
+        boolean paused = false;
 
         waitForStart();
 
@@ -92,9 +105,10 @@ public class ExplicitMPC extends LinearOpMode {
             robot.updateBulkData();
             robot.updatePos();
 
-            double dt = profiler.getDeltaTime(TimeUnits.MILLISECONDS, false);
+            //double dt = profiler.getDeltaTime(TimeUnits.MILLISECONDS, false);
 
-            timestepIndex = timeStepSearch(dt, timesteps);
+            //timestepIndex = timeStepSearch(dt, timesteps);
+            timestepIndex = posSearch(new Pose2d(robot.getPos().getY(), -robot.getPos().getX(), -robot.getPos().getHeading()), positions);
 
             if(timestepIndex >= timesteps.size()){
                 timestepIndex = timesteps.size() - 1;
@@ -104,44 +118,59 @@ public class ExplicitMPC extends LinearOpMode {
                 timestepIndex = 0;
             }
 
-            //robot.drive.goToPoint(new Pose2d(0, 10, 0), robot.getPos(), 1.0, 1.0, 1.0);
-            if(robot.getPos().vec().distTo(new Vector2d(-21, 56)) < 5){
-                telemetry.addLine("In PID kickout");
-                robot.drive.goToPoint(new Pose2d(-21, 56, 0), robot.getPos(), 1.0, 1.0, 1.0);
+            if(desiredStates.size() != 0 && desiredStates.get(0).vec().distTo(robot.getPos().vec()) < 0.5){
+                robot.drive.setPower(0, 0, 0);
+                desiredStates.remove(0);
+                state++;
+                paused = true;
+            }else if(paused){
+                if(profiler.getDeltaTime(TimeUnits.SECONDS, false) > 1){
+                    paused = false;
+                }else{
+                    robot.drive.setPower(0, 0, 0);
+                }
             }else{
-                telemetry.addLine("In MPC");
-                robot.drive.goToPointFF(new Pose2d(-positions.get(timestepIndex).getY(), positions.get(timestepIndex).getX(), -positions.get(timestepIndex).getHeading()),
-                        robot.getPos(),
-                        1.0,
-                        1.0,
-                        motorActuations.get(timestepIndex).get(0),
-                        motorActuations.get(timestepIndex).get(2),
-                        motorActuations.get(timestepIndex).get(1),
-                        motorActuations.get(timestepIndex).get(3));
+                double max_pow = 1.0;
+                if(state == 3 && robot.getPos().getY() > 23 && robot.getPos().getY() < 53){
+                    max_pow = 0.4;
+                }
+
+                profiler.reset();
+
+                if(desiredStates.size() != 0 && robot.getPos().vec().distTo(desiredStates.get(0).vec()) < 5){
+                    telemetry.addData("...", "In PID kickout");
+                    robot.GoTo(desiredStates.get(0), new Pose2d(1.0, 1.0, 1.0));
+                }else{
+                    telemetry.addData("...", "In MPC");
+                    robot.drive.goToPointFF(new Pose2d(-positions.get(timestepIndex).getY(), positions.get(timestepIndex).getX(), -positions.get(timestepIndex).getHeading()),
+                            robot.getPos(),
+                            max_pow,
+                            motorActuations.get(timestepIndex).get(0),
+                            motorActuations.get(timestepIndex).get(2),
+                            motorActuations.get(timestepIndex).get(1),
+                            motorActuations.get(timestepIndex).get(3));
+                }
             }
 
-            /*robot.drive.setPower(motorActuations.get(timestepIndex).get(0),
-                    motorActuations.get(timestepIndex).get(2),
-                    motorActuations.get(timestepIndex).get(1),
-                    motorActuations.get(timestepIndex).get(3));*/
-
-            robot.drive.write();
+            telemetry.addData("State", state);
+            telemetry.addData("Position", robot.getPos());
             telemetry.addData("Timestamp", timesteps.size());
             telemetry.addData("Positions", positions.size());
             telemetry.addData("Motor Actuation", motorActuations.size());
-            telemetry.addData("Error", new Pose2d(0, 48, 0).vec().distTo(robot.getPos().vec()));
-            telemetry.addData("Loop Cycle", 1/dt);
+            prevIndex = timestepIndex;
 
             telemetry.update();
+            robot.drive.write();
         }
     }
 
-    public static int posSearch(Pose2d pose, ArrayList<Pose2d> a) {
+    public int posSearch(Pose2d pose, ArrayList<Pose2d> a) {
         int closest = 0;
 
         for(int i = 0; i < a.size(); i++){
-            if(a.get(i).vec().distTo(pose.vec()) < a.get(i).vec().distTo(a.get(closest).vec()) &&
-                    a.get(i).headingVec().distTo(pose.headingVec()) < a.get(i).headingVec().distTo(a.get(closest).headingVec())){
+            if(Math.abs(i - prevIndex) < 20/*Math.abs(timesteps.get(i) - profiler.getDeltaTime(false)) < 100 */&&
+                    pose.vec().distTo(a.get(i).vec()) < pose.vec().distTo(a.get(closest).vec())/* &&
+                    Math.abs(pose.heading - a.get(i).heading) < Math.abs(pose.heading - a.get(closest).heading)*/){
                 closest = i;
             }
         }

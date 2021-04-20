@@ -44,6 +44,10 @@ public class CurvePoint {
         return new Vector2d(x, y);
     }
 
+    public Pose2d toPose(){
+        return new Pose2d(x, y, heading);
+    }
+
     public void setPoint(Vector2d Point) {
         this.x = Point.getX();
         this.y = Point.getY();
