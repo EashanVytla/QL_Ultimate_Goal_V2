@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -58,8 +57,8 @@ public class Servo_Tester extends LinearOpMode {
     }
 }
 
-@Config
+
 class ServoTester{
     //Set the set/start position of the servo in dashboard
-    public static double pos = 0.0;
+    public static double pos = 0.6;
 }

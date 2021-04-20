@@ -9,7 +9,8 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class Intake {
     private Caching_Motor[] intake = new Caching_Motor[2];
-    public static boolean toggle = false;
+    public static boolean toggle;
+    public boolean inverseToggle;
     private Caching_Motor leveler;
 
     public Intake(HardwareMap map, Telemetry telemetry){
@@ -35,14 +36,17 @@ public class Intake {
     public void operate(GamepadEx gamepad){
         if(gamepad.isPress(GamepadEx.Control.right_bumper)){
             toggle = !toggle;
-
-            if(toggle){
-                setPower(1.0);
-            } else {
-                setPower(0.0);
-            }
+            inverseToggle = false;
         }
 
 
+        if(gamepad.isPress(GamepadEx.Control.left_bumper)){
+            toggle = !toggle;
+            setPower(-1.0);
+        }else if(toggle){
+            setPower(1.0);
+        }else{
+            setPower(0.0);
+        }
     }
 }
