@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 import android.util.Log;
 
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -26,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 //If you want to be able to run the OpMode then you need this. The name is optional.
 @Autonomous
@@ -57,6 +59,8 @@ public class MPC_Tester extends LinearOpMode {
     double lastResetTime = 0d;
     Robot robot;
 
+    private final double dt = 0.002d;
+
     static {
         TimeUtil.isUsingComputer = false;
     }
@@ -82,24 +86,23 @@ public class MPC_Tester extends LinearOpMode {
         elapsedTime = new TimeProfiler(false);
 
         driveModel = new MecanumDriveModel(0.01,
-                12.7006,
-                0.3149632,
-                0.000394,
-                0.000269,
-                0.665282,
-                0.05,
+                17.872,
+                0.207,
+                0.000238,
+                2.49e-5,
+                0.6226,
+                0.048,
                 0.2286, 0.2286, 0.2286, 0.2286,
                 MotorModel.generateMotorModel(Motor.NEVEREST_20, 4, 3.0/4.0, null));
 
-        obstacles.add(new Obstacle(22.5,22.5, 3d, 200d));
+        //obstacles.add(new Obstacle(22.5,22.5, 3d, 200d));
 
-        /*mpcSolver = new MPCSolver(1000, 0.002d, SimpleMatrix.diag(100d, 10, 100d, 10, 100d, 10),
-                SimpleMatrix.diag(100d, 10, 100d, 10, 100d, 10), SimpleMatrix.diag(1d, 1d, 1d, 1d), driveModel);*/
+        /*mpcSolver = new MPCSolver(1000, dt, SimpleMatrix.diag(100d, 10, 100d, 10, 100d, 10),
+                SimpleMatrix.diag(1000d, 50d, 200d, 25d, 10d, 1d), SimpleMatrix.diag(1d, 1d, 1d, 1d), driveModel, obstacles);*/
+        mpcSolver = new MPCSolver(1000, dt, SimpleMatrix.diag(50d, 5, 50d, 5, 50d, 5),
+                SimpleMatrix.diag(100d, 10d, 100d, 10d, 5d, 0d), SimpleMatrix.diag(3d, 3d, 3d, 3d), driveModel, obstacles);
 
-        mpcSolver = new MPCSolver(1000, 0.002d, SimpleMatrix.diag(100d, 10, 100d, 10, 100d, 10),
-                SimpleMatrix.diag(1000d, 50d, 200d, 25d, 10d, 1d), SimpleMatrix.diag(1d, 1d, 1d, 1d), driveModel, obstacles);
-
-        desiredStates.add(Util.convertPoseToState(new Pose2d(45d, 45d, new Rotation2d(Math.toRadians(0d), false))));
+        desiredStates.add(Util.convertPoseToState(new Pose2d(48d, 48d, new Rotation2d(Math.toRadians(90d), false))));
         //desiredStates.add(Util.convertPoseToState(new Pose2d(6d + 52, -(10d - 50), new Rotation2d(Math.toRadians(0d), false))));
         //desiredStates.add(Util.convertPoseToState(new Pose2d(100d, 0d, new Rotation2d(Math.toRadians(0d), false))));
         //desiredStates.add(Util.convertPoseToState(new Pose2d(-27d + 52, -(55d - 50), new Rotation2d(Math.toRadians(180d), false))));
@@ -112,8 +115,6 @@ public class MPC_Tester extends LinearOpMode {
             e.printStackTrace();
         }
 
-
-
         runnableMPC = new RunnableMPC(5, mpcSolver, () -> state, desiredStates.get(0), obstacles);
         new Thread(runnableMPC).start();
 
@@ -124,6 +125,8 @@ public class MPC_Tester extends LinearOpMode {
 
         timeProfiler.start();
         elapsedTime.start();
+
+        runnableMPC.resetTimer();
 
         while(opModeIsActive() && !isStopRequested()){
             robot.updateBulkData();
@@ -149,27 +152,25 @@ public class MPC_Tester extends LinearOpMode {
 
                 MPCSolver updatedController = runnableMPC.getUpdatedMPC();
                 if(updatedController != null) {
-                    telemetry.addData("Hello", "Hello");
                     mpcSolver = updatedController;
                 }
 
                 try {
-                    input = mpcSolver.getOptimalInput(runnableMPC.controllerElapsedTime(), state);
-                    telemetry.addData("IMPORTANT", mpcSolver.getOptimalInput(runnableMPC.controllerElapsedTime(), state));
+                    input = mpcSolver.getOptimalInput((int)(runnableMPC.controllerElapsedTime()/dt), state);
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
 
                 //angle wrap heading
-                double heading = robot.getAbsoluteHeading();
+                double heading = robot.localizer.getAbsoluteHeading();
 
                 com.acmerobotics.roadrunner.geometry.Pose2d velocities = new com.acmerobotics.roadrunner.geometry.Pose2d((robot.getPos().getX() - prevPose.getX())/dt, (robot.getPos().getY() - prevPose.getY())/dt, (heading - prevPose.getHeading())/dt);
 
                 //angle wrap angular velocity
                 double omega = velocities.getHeading();
 
-                //state = new SimpleMatrix(6, 1, true, new double[]{robot.getPos().getY()/39.37, velocities.getY()/39.37, -robot.getPos().getX()/39.37, -velocities.getX()/39.37, heading, -omega});
-                state = driveModel.simulate(state, input, dt);
+                state = new SimpleMatrix(6, 1, true, new double[]{robot.getPos().getY()/39.37, velocities.getY()/39.37, -robot.getPos().getX()/39.37, -velocities.getX()/39.37, heading, -omega});
+                //state = driveModel.simulate(state, input, dt);
 
                 applyInput();
 
@@ -180,8 +181,16 @@ public class MPC_Tester extends LinearOpMode {
                 prevPose = new com.acmerobotics.roadrunner.geometry.Pose2d(robot.getPos().getX(), robot.getPos().getY(), heading);
             }
 
+            telemetry.addData("Error Position", robot.getPos().vec().distTo(new Vector2d(-48, 48)));
+            telemetry.addData("Error Heading", Math.abs(robot.getPos().getHeading()));
+
             telemetry.update();
         }
+    }
+
+    public double scaleInput(double input, double kS, double maxPower){
+        double factor = maxPower - kS;
+        return factor * input + Math.signum(input) * kS;
     }
 
     /*@Override
@@ -198,7 +207,15 @@ public class MPC_Tester extends LinearOpMode {
     }
 
     private void applyInput() {
-        robot.drive.setPower(input.get(0), input.get(2), input.get(1), input.get(3));
-        //robot.drive.write();
+        robot.drive.setPower(
+                /*scaleInput(input.get(0), 0.08, 1.0),
+                scaleInput(input.get(2), 0.08, 1.0),
+                scaleInput(input.get(1), 0.08, 1.0),
+                scaleInput(input.get(3), 0.08, 1.0));*/
+                input.get(0),
+                input.get(2),
+                input.get(1),
+                input.get(3));
+        robot.drive.write();
     }
 }

@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Components;
 
 import android.graphics.Bitmap;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -43,14 +45,21 @@ public class Robot {
     OpenCvCamera webcam;
     RingDetectionPipelineV2 detector;
     Pose2d startPos = new Pose2d(0, 0, 0);
-    public final Vector2d ULTIMATE_GOAL_POS = new Vector2d(3, 136);
+    public static final Vector2d ULTIMATE_GOAL_POS = new Vector2d(3, 136);
+
     private static boolean continuousMode = false;
+
+    TelemetryPacket packet;
+    FtcDashboard dashboard;
 
     public Robot(HardwareMap map, Telemetry telemetry){
         this.hardwareMap = map;
         this.telemetry = telemetry;
 
-        continuousMode = false;
+        dashboard = FtcDashboard.getInstance();
+        packet = new TelemetryPacket();
+
+        continuousMode = true;
 
         hub1 = map.get(ExpansionHubEx.class, "Expansion Hub 173");
         hub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
@@ -75,30 +84,35 @@ public class Robot {
         shooter.flicker.start();
     }
 
-    public void operate(GamepadEx gamepad1, GamepadEx gamepad2){
+    public void resetShooterPID(){
+        shooter.reset();
+    }
+
+    public void operate(GamepadEx gamepad1ex, GamepadEx gamepad2ex) {
         updateBulkData();
+        updatePos();
 
-        if(gamepad1.isPress(GamepadEx.Control.dpad_left))
+        if (gamepad1ex.isPress(GamepadEx.Control.dpad_left)) {
             continuousMode = !continuousMode;
+        }
 
-        drive.driveCentric(gamepad1.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
+        drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
 
-        shooter.operate(gamepad2, getData2());
-        intake.operate(gamepad1);
-        wobbleGoal.operate(gamepad1);
-        converter.operate(gamepad2);
+        shooter.operate(gamepad1ex, getPos(), getData2(), packet);
+        intake.operate(gamepad1ex);
+        wobbleGoal.operate(gamepad1ex, gamepad2ex);
+        converter.operate(gamepad1ex);
 
         telemetry.addData("Robot Position:", getPos());
 
         telemetry.addLine("Shooting in " + (isContinuous() ? "continuous mode" : "flicker mode") + "...");
 
-        updatePos();
-
+        dashboard.sendTelemetryPacket(packet);
         drive.write();
         intake.write();
         shooter.write();
         wobbleGoal.write();
-        converter.write();
+        //converter.write();
     }
 
     public static boolean isContinuous(){
@@ -183,14 +197,6 @@ public class Robot {
         encoderRX.update(data);
         encoderRY.update(data);
         localizer.update(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist(), getVelocityX(), getVelocityY(), data);
-    }
-
-    public double getAbsoluteHeading(){
-        encoderLX.update(data);
-        encoderLY.update(data);
-        encoderRX.update(data);
-        encoderRY.update(data);
-        return localizer.getAbsoluteHeading(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
     }
 
     public double getLeft_X_Dist(){

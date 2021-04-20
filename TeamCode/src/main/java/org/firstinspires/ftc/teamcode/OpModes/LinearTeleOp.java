@@ -2,58 +2,46 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.firstinspires.ftc.teamcode.Components.Robot;
-import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
+import org.firstinspires.ftc.teamcode.Components.Shooter;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @TeleOp(name = "TeleOp")
 public class LinearTeleOp extends LinearOpMode {
     Robot robot;
+    Shooter shooter;
     GamepadEx gamepad1ex;
     GamepadEx gamepad2ex;
-    private Caching_Servo rotator;
-    private final double start_pos_tick = 0.341;
-    private final double ticks_to_degrees = (0.95/130);
-    private final double max_tick = 0.59;
-    private final double min_tick = 0.17;
+
+    double kStrafe = 1.0;
+    double kVert = 1.0;
 
     @Override
     public void runOpMode(){
         robot = new Robot(hardwareMap, telemetry);
-        rotator = new Caching_Servo(hardwareMap, "rotator");
+        shooter = new Shooter(hardwareMap, telemetry);
+
+        robot.localizer.k_strafe = kStrafe;
+        robot.localizer.k_vert = kVert;
+
+        robot.localizer.reset();
         gamepad1ex = new GamepadEx(gamepad1);
         gamepad2ex = new GamepadEx(gamepad2);
-        rotator.setPosition(0.5);
 
         waitForStart();
 
         robot.start();
 
-        while(opModeIsActive() && !isStopRequested()){
+        while(opModeIsActive()){
             robot.operate(gamepad1ex, gamepad2ex);
-            setRotator(robot.getPos().getX(), robot.getPos().getY());
-            robot.converter.tickValue();
 
-            rotator.write();
+            telemetry.addData("Y button", gamepad1ex.isPress(GamepadEx.Control.y));
+
+            telemetry.addData("Y Power", gamepad1ex.gamepad.left_stick_x);
+
             telemetry.update();
+            gamepad1ex.loop();
+            gamepad2ex.loop();
         }
-    }
-
-    public void setRotator(double x, double y){
-        double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getY() - y, robot.ULTIMATE_GOAL_POS.getX() - x);
-
-        double pos = angle * ticks_to_degrees;
-
-        if(pos > max_tick){
-            pos = max_tick;
-        } else if(pos < min_tick){
-            pos = min_tick;
-        } else {
-
-        }
-
-        rotator.setPosition(start_pos_tick + pos);
-        telemetry.addData("Pos", rotator.getPosition());
     }
 }
