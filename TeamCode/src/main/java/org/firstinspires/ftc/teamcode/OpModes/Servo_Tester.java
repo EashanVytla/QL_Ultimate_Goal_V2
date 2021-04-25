@@ -11,14 +11,12 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 @TeleOp
 public class Servo_Tester extends LinearOpMode {
     //Set the hardware mapping name of the servo
-    final String name = "rotator";
+    final String name = "wobble_grab";
 
     Servo servo;
     private double pos;
     GamepadEx gamepadEx;
     private boolean servoToPosToggle = false;
-
-    Robot robot;
 
     @Override
     public void runOpMode(){
@@ -28,8 +26,6 @@ public class Servo_Tester extends LinearOpMode {
 
         waitForStart();
         while(opModeIsActive()) {
-            robot.updateBulkData();
-
             if(gamepadEx.isPress(GamepadEx.Control.a)){
                 servoToPosToggle = !servoToPosToggle;
             }
@@ -48,7 +44,6 @@ public class Servo_Tester extends LinearOpMode {
                         pos -= 0.0005;
                     }
                 }
-
                 telemetry.addData("Mode", "In dynamic position mode..");
                 telemetry.addData("    ", "Use the Dpads to change the position dynamically");
                 telemetry.addData("    ", "Press A again to go back into set position mode");
@@ -56,6 +51,7 @@ public class Servo_Tester extends LinearOpMode {
             }
 
             telemetry.addData("Position", servo.getPosition());
+
             telemetry.update();
             gamepadEx.loop();
         }
@@ -65,5 +61,5 @@ public class Servo_Tester extends LinearOpMode {
 
 class ServoTester{
     //Set the set/start position of the servo in dashboard
-    public static double pos = 0.475;
+    public static double pos = 0.0;
 }

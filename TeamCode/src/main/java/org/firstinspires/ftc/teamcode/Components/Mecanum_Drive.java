@@ -41,7 +41,7 @@ public class Mecanum_Drive{
     public static double kd = 0.03;
 
     public static double kpr = 2.75;
-    public static double kir = 0;
+    public static double kir = 0.0;
     public static double kdr = 0.15;
 
     public static double kpMPC = 0.065;
@@ -56,7 +56,7 @@ public class Mecanum_Drive{
 
     int counter;
 
-    protected Mecanum_Drive(HardwareMap map, Telemetry telemetry){
+    public Mecanum_Drive(HardwareMap map, Telemetry telemetry){
         this.telemetry = telemetry;
         motors[0] = new Caching_Motor(map, "front_left");
         motors[1] = new Caching_Motor(map, "front_right");
@@ -85,6 +85,8 @@ public class Mecanum_Drive{
         motors[1].motor.setDirection(DcMotorSimple.Direction.REVERSE);
         motors[3].motor.setDirection(DcMotorSimple.Direction.REVERSE );
     }
+
+    public void resetPID(){ }
 
     public void write(){
         motors[counter].write();

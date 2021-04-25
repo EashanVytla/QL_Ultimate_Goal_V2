@@ -18,9 +18,9 @@ import org.openftc.revextensions2.RevBulkData;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 2766.5903757664166216705064587044;//2762.221712973584;
+    public static double TRACK_WIDTH1 = 2778.0495316690330858458660896672;//2766.5903757664166216705064587044;//2762.221712973584;
 
-    public static double TRACK_WIDTH2 = 2437.2590097735121981307437313458;//2434.8826022248963;
+    public static double TRACK_WIDTH2 = 2437.4977421881500411343970569909;//2437.2590097735121981307437313458;//2434.8826022248963;
 
     private final double EPSILON = 1e-6;
     private static Pose2d myPose = new Pose2d(0, 0, 0);
@@ -39,7 +39,7 @@ public class S4T_Localizer {
     double prevelxRaw = 0;
     double preverxRaw = 0;
 
-    public double heading = 0;
+    public static double heading = 0;
     Telemetry telemetry;
     public double k_strafe = 0.5;
     public double k_vert = 1.0;
