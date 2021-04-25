@@ -26,7 +26,6 @@ public class Robot {
     public Shooter shooter;
     public Intake intake;
     public WobbleGoal wobbleGoal;
-    public Converter converter;
 
     public ExpansionHubEx hub1;
     public ExpansionHubEx hub2;
@@ -59,8 +58,6 @@ public class Robot {
         dashboard = FtcDashboard.getInstance();
         packet = new TelemetryPacket();
 
-        continuousMode = true;
-
         hub1 = map.get(ExpansionHubEx.class, "Expansion Hub 173");
         hub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
 
@@ -73,35 +70,41 @@ public class Robot {
         shooter = new Shooter(map, telemetry);
         intake = new Intake(map, telemetry);
         wobbleGoal = new WobbleGoal(map, telemetry);
-        converter = new Converter(map, telemetry);
 
         updateBulkData();
 
         localizer = new S4T_Localizer(hardwareMap, telemetry);
     }
 
+    public static double wrapHeading(double heading){
+        if(heading > Math.PI){
+            return heading - (2 * Math.PI);
+        }
+
+        return heading;
+    }
+
     public void start(){
-        shooter.flicker.start();
+        shooter.start();
     }
 
     public void resetShooterPID(){
-        shooter.reset();
+        shooter.resetPID();
     }
 
     public void operate(GamepadEx gamepad1ex, GamepadEx gamepad2ex) {
         updateBulkData();
         updatePos();
 
-        if (gamepad1ex.isPress(GamepadEx.Control.dpad_left)) {
+        if (gamepad1ex.isPress(GamepadEx.Control.dpad_left) || gamepad2ex.isPress(GamepadEx.Control.dpad_left)) {
             continuousMode = !continuousMode;
         }
 
         drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
 
-        shooter.operate(gamepad1ex, getPos(), getData2(), packet);
-        intake.operate(gamepad1ex);
+        shooter.operate(gamepad1ex, gamepad2ex, getPos(), getData2(), packet);
+        intake.operate(gamepad1ex, gamepad2ex);
         wobbleGoal.operate(gamepad1ex, gamepad2ex);
-        converter.operate(gamepad1ex);
 
         telemetry.addData("Robot Position:", getPos());
 
@@ -112,11 +115,14 @@ public class Robot {
         intake.write();
         shooter.write();
         wobbleGoal.write();
-        //converter.write();
     }
 
     public static boolean isContinuous(){
         return continuousMode;
+    }
+
+    public static void setContinuous(boolean val){
+        continuousMode = val;
     }
 
     public double getVelocityXMetersPerSecond(){

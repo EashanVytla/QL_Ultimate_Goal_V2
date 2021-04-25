@@ -27,7 +27,7 @@ public class Intake_Tester extends OpMode {
 
     @Override
     public void loop() {
-        intake.operate(gamepadEx);
+        intake.operate(gamepadEx, gamepadEx);
         if(gamepadEx.isPress(GamepadEx.Control.y)){
             toggle = !toggle;
         }

@@ -8,9 +8,9 @@ import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class WobbleGoal {
-    public final double clamp_pos = 0.178;
+    public final double clamp_pos = 0;
     public final double grabber_idle = 0.489;
-    public final double release_pos = 0.95;
+    public final double release_pos = 0.8385;
     public final double lift_pos = 0.3475;
     public final double drop_over_lift_pos = 0.223;
     public final double auto_lift_pos = 0.15;
@@ -51,7 +51,7 @@ public class WobbleGoal {
     }
 
     public void release(){
-        servo_grab.setPosition(grabber_idle);
+        servo_grab.setPosition(release_pos);
     }
 
     public void lift(){

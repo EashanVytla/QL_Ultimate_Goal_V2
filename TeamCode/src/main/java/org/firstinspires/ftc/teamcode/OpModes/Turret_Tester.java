@@ -24,7 +24,7 @@ public class Turret_Tester extends LinearOpMode {
     public void runOpMode(){
         gamepadEx = new GamepadEx(gamepad1);
         servo = hardwareMap.servo.get(name);
-        pos = ServoTester.pos;
+        pos = TurretTester.pos;
         robot = new Robot(hardwareMap, telemetry);
 
         waitForStart();
@@ -38,7 +38,7 @@ public class Turret_Tester extends LinearOpMode {
             double flywheelVelo = robot.shooter.getFlywheelVelcoity(robot.getData2());
 
             robot.shooter.setFlap(TurretTester.flapPos);
-            robot.shooter.setFlywheelVelocity(1750, flywheelVelo);
+            robot.shooter.setFlywheelVelocity(2000, flywheelVelo);
             telemetry.addData("Flywheel Velocity", flywheelVelo);
 
             if(servoToPosToggle){
