@@ -44,7 +44,7 @@ public class Robot {
     OpenCvCamera webcam;
     RingDetectionPipelineV2 detector;
     Pose2d startPos = new Pose2d(0, 0, 0);
-    public static final Vector2d ULTIMATE_GOAL_POS = new Vector2d(3, 136);
+    public static final Vector2d ULTIMATE_GOAL_POS = new Vector2d(5, 136);
 
     private static boolean continuousMode = false;
 
@@ -74,6 +74,7 @@ public class Robot {
         updateBulkData();
 
         localizer = new S4T_Localizer(hardwareMap, telemetry);
+        localizer.setPacket(packet);
     }
 
     public static double wrapHeading(double heading){

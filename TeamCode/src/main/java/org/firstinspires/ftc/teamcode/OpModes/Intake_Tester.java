@@ -27,19 +27,9 @@ public class Intake_Tester extends OpMode {
 
     @Override
     public void loop() {
-        intake.operate(gamepadEx, gamepadEx);
-        if(gamepadEx.isPress(GamepadEx.Control.y)){
-            toggle = !toggle;
-        }
-
-        if(toggle){
-            shooter.startFlywheel();
-        } else {
-            shooter.stopFlywheel();
-        }
+        intake.setPower(gamepadEx.gamepad.right_trigger - gamepadEx.gamepad.right_trigger);
 
         intake.write();
-        shooter.write();
         gamepadEx.loop();
     }
 }

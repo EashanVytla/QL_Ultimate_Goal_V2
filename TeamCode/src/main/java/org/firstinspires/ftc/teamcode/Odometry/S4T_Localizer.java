@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Odometry;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
@@ -18,7 +19,7 @@ import org.openftc.revextensions2.RevBulkData;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 2778.0495316690330858458660896672;//2766.5903757664166216705064587044;//2762.221712973584;
+    public static double TRACK_WIDTH1 = 2776.0495316690330858458660896672;//2766.5903757664166216705064587044;//2762.221712973584;
 
     public static double TRACK_WIDTH2 = 2437.4977421881500411343970569909;//2437.2590097735121981307437313458;//2434.8826022248963;
 
@@ -46,8 +47,8 @@ public class S4T_Localizer {
     public double TICKS_TO_INCHES_VERT = 201.67339734597755609;
     public double TICKS_TO_INCHES_STRAFE = 335.381388888888888;
 
-    public static double clipping_strafe = 0;
-    public static double clipping_vert = 0;
+    public static double clipping_strafe = 0.075;
+    public static double clipping_vert = 0.075;
     public final Vector2d DASHBOARD_OFFSET_FROM_CENTER = new Vector2d(-48, -55);
 
     //T265 Camera Instance Variables:
@@ -66,6 +67,7 @@ public class S4T_Localizer {
 
     private final int robotRadius = 9; // inches
     private HardwareMap hardwareMap;
+    private TelemetryPacket packet;
 
     public S4T_Localizer(HardwareMap map, Telemetry telemetry){
         this.telemetry = telemetry;
@@ -89,6 +91,16 @@ public class S4T_Localizer {
                 slamra.start();
             }
         }*/
+    }
+
+    public void setPacket(TelemetryPacket packet){
+        this.packet = packet;
+    }
+
+    private void addPacket(String caption, Object value){
+        if(packet != null){
+            packet.put(caption, value);
+        }
     }
 
     /*public Pose2d getT265Pose(double xVelo, double yVelo){
@@ -203,6 +215,9 @@ public class S4T_Localizer {
             value = (dthetavert - dthetastrafe)/2;
             //value = dthetavert;
         }
+
+        addPacket("wf", wf);
+        addPacket("ws", ws);
 
         return value;
     }

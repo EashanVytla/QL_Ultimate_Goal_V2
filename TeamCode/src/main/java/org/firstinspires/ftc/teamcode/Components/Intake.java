@@ -16,7 +16,7 @@ public class Intake {
     public Caching_Servo bar;
 
     private double barUp = 0.338;
-    private double barDown = 0.72;
+    private double barDown = 0.78;
 
     private boolean barToggle = false;
 

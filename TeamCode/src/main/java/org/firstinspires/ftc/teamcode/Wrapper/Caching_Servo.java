@@ -24,6 +24,15 @@ public class Caching_Servo {
         }
     }
 
+    public void setPosition(double pos, double EPSILON){
+        if (Math.abs(pos - prev_pos) > EPSILON){
+            query = pos;
+        }
+        else{
+            query = -1.0;
+        }
+    }
+
     public double getPosition(){
         return prev_pos;
     }

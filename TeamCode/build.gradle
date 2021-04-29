@@ -32,4 +32,7 @@ dependencies {
     implementation 'com.acmerobotics.dashboard:dashboard:0.4.1'
     implementation 'com.spartronics4915.lib:ftc265:2.1.8'
     implementation 'org.ejml:ejml-all:0.40'
+
+    implementation 'com.arcrobotics:ftclib:1.1.6'
+    implementation 'com.arcrobotics.ftclib:vision:1.1.0'
 }

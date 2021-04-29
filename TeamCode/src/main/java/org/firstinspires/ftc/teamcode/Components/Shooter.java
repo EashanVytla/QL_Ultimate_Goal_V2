@@ -1,22 +1,17 @@
 package org.firstinspires.ftc.teamcode.Components;
 
-
-import android.os.DropBoxManager;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.arcrobotics.ftclib.controller.PIDController;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.OpModes.LinearTeleOp;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
@@ -31,8 +26,10 @@ public class Shooter {
     private boolean aToggle = false;
     public Caching_Servo flap;
 
+    public static double flywheelTargetVelo = 2000;
+
     public static final double FLAP_MIN = 0.725;
-    public static final double FLAP_MAX = (FLAP_MIN + 0.06);
+    public static final double FLAP_MAX = 0.78;
 
     private final double ROTATOR_MIN = 0.25;
     private final double ROTATOR_MAX = 0.641;
@@ -43,18 +40,26 @@ public class Shooter {
 
     private Caching_Servo rotator;
 
-    public static double kpF = 0.3;
-    public static double kiF = 0.075;
-    public static double kdF = 0.015;
+    public static double kpF = 0.01;
+    public static double kiF = 0;
+    public static double kdF = 0.0001;
+
+    public static double kS = 0.0;
+    public static double kV = 1.075;
 
     public Caching_Servo converter;
-    public static double continuousModePos = 0.25;
-    public static double flickerModePos = 0.05;
+    public static double continuousModePos = 0.40;
+    public static double transitionModePos = 0.50;
+    public static double flickerModePos = 0.275;
 
-    private double flapTesterPos = 0.5;
+    private double flapTesterPos = 0.7;
 
     private ElapsedTime time;
     private boolean prevContinuous;
+    private boolean autoAllign = true;
+
+    SimpleMotorFeedforward feedforward =
+            new SimpleMotorFeedforward(kS, kV);
 
     public Shooter(HardwareMap map, Telemetry telemetry){
         motor = new Caching_Motor(map, "shooter");
@@ -100,14 +105,14 @@ public class Shooter {
     }
 
     public double getFlapPos(double distance){
-        double newDist = Range.clip(distance, 77, 120);
-        double a = -7.2889e-10 * Math.pow(newDist, 6);
-        a += 4.22626e-7 * Math.pow(newDist, 5);
-        a += -0.000101526 * Math.pow(newDist, 4);
-        a += 0.0129336 * Math.pow(newDist, 3);
-        a += -0.921474 * Math.pow(newDist, 2);
-        a += 34.8111 * newDist;
-        a += -543.964;
+        double newDist = Range.clip(distance, 75, 120);
+        double a = 3.02204665e-5 * Math.pow(newDist, 1);
+        a += 1.16177569e-3 * Math.pow(newDist, 2);
+        a += -3.26492093e-5 * Math.pow(newDist, 3);
+        a += 3.84664299e-7 * Math.pow(newDist, 4);
+        a += -2.14517587e-9 * Math.pow(newDist, 5);
+        a += 4.67677460e-12 * Math.pow(newDist, 6);
+        a += 0.07692692731456108;
 
         return Range.clip(a, FLAP_MIN, FLAP_MAX);
     }
@@ -125,9 +130,6 @@ public class Shooter {
         }
 
         double tick_offset = Math.toDegrees(targetangle - heading) / DEGREES_TO_TICKS;
-
-        telemetry.addData("Offset", Math.toDegrees(targetangle - heading));
-        telemetry.addData("0 value", ROTATOR_0);
 
         double pos = Range.clip(ROTATOR_0 + tick_offset, ROTATOR_MIN, ROTATOR_MAX);
 
@@ -149,7 +151,9 @@ public class Shooter {
     public void setFlywheelVelocity(double targetVelo, double currentVelo){
         flywheelPIDController.setTargetPosition(targetVelo);
 
-        setFlywheelPower(flywheelPIDController.update(currentVelo));
+        telemetry.addData("feedforward", feedforward.calculate(targetVelo)/2800);
+
+        setFlywheelPower(flywheelPIDController.update(currentVelo) + (feedforward.calculate(targetVelo)/2800));
     }
 
     public void setFlywheelPower(double value){
@@ -164,10 +168,8 @@ public class Shooter {
         }
     }
 
-    private boolean prevIntakeOn = false;
+    //private boolean prevIntakeOn = false;
     private boolean switching = false;
-    private boolean queryCont = false;
-    private boolean first = true;
 
     public double getRotatorPos(){
         return rotator.getPosition();
@@ -178,30 +180,29 @@ public class Shooter {
 
         telemetry.addData("Flywheel Velocity", flywheelVelo);
         packet.put("Flywheel Velocity", flywheelVelo);
-
-        if(currentPos.getY() > 110){
-            if(first){
-                queryCont = Robot.isContinuous();
-                first = false;
-            }
-            Robot.setContinuous(false);
-        }else{
-            first = true;
-            Robot.setContinuous(queryCont);
-        }
+        telemetry.addData("Dist to Ultimate Goal", currentPos.vec().distTo(Robot.ULTIMATE_GOAL_POS));
 
         if(gamepad1Ex.isPress(GamepadEx.Control.left_stick_button) || gamepad2Ex.isPress(GamepadEx.Control.a)) {
             aToggle = !aToggle;
         }
 
-        if((Robot.isContinuous() && !prevContinuous) || (!Robot.isContinuous() && prevContinuous)){
+        if(gamepad1Ex.isPress(GamepadEx.Control.right_trigger)){
+            autoAllign = true;
+        }
+
+        if((Robot.isContinuous() && !prevContinuous)){
+            autoAllign = true;
             switching = true;
             time.reset();
         }
 
-        if(Robot.isContinuous()){
-            rotator.setPosition(0.35);
+        if((!Robot.isContinuous() && prevContinuous)){
+            switching = true;
+            time.reset();
+            autoAllign = false;
+        }
 
+        if(Robot.isContinuous()){
             if(time.time() > 0.75){
                 flicker.setIdlePos(rotator.getPosition());
                 converter.setPosition(continuousModePos);
@@ -209,24 +210,23 @@ public class Shooter {
                 flicker.setIdlePos(rotator.getPosition());
                 switching = false;
             }else if(time.time() > 0.25){
-                converter.setPosition(0.28);
+                rotator.setPosition(0.35);
+                converter.setPosition(transitionModePos);
             }
         }else if(!xToggle){
-            rotator.setPosition(0.35);
-
             if(time.time() > 0.5){
                 switching = false;
                 flicker.setPos(Flicker.inPos);
             }else if(time.time() > 0.25){
+                rotator.setPosition(0.35);
                 converter.setPosition(flickerModePos);
             }
         }
 
-        telemetry.addData("Converter Position", converter.getPosition());
-
         if (aToggle) {
             if (!Robot.isContinuous()) {
-                startFlywheel();
+                //setFlywheelPower(1.0);
+                setFlywheelVelocity(flywheelTargetVelo, flywheelVelo);
 
                 if (gamepad1Ex.isPress(GamepadEx.Control.left_trigger)) {
                     Intake.pause = true;
@@ -247,22 +247,26 @@ public class Shooter {
                     xToggle = false;
                 }
             }else{
-                setFlywheelVelocity(2000, flywheelVelo);
+                //startFlywheel();
+                setFlywheelVelocity(flywheelTargetVelo, flywheelVelo);
             }
         }else{
+            Intake.pause = false;
+            //resetPID();
+            stopFlywheel();
+        }
+
+        /*if(prevIntakeOn && Intake.isOff){
             resetPID();
-            if(!LinearTeleOp.powerShots){
-                setFlywheelPower(0.0);
+        }*/
+
+        if(!switching){
+            flap.setPosition(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())), 1e-6);
+            if(autoAllign){
+                setRotator(currentPos);
+            }else{
+                setRotator(ROTATOR_0);
             }
-        }
-
-        if(prevIntakeOn && Intake.isOff){
-            resetPID();
-        }
-
-        if(!LinearTeleOp.powerShots && !switching){
-            flap.setPosition(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())));
-            setRotator(currentPos);
         }
 
         //Flicker Regression Tuning
@@ -278,11 +282,8 @@ public class Shooter {
         flap.setPosition(flapTesterPos);*/
         //----------------------------------------------------------
 
-        telemetry.addData("X toggle", xToggle);
-        telemetry.addData("distance to goal", Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec()));
         telemetry.addData("Flap Position", flap.getPosition());
-
         prevContinuous = Robot.isContinuous();
-        prevIntakeOn = !Intake.isOff;
+        //prevIntakeOn = !Intake.isOff;
     }
 }
