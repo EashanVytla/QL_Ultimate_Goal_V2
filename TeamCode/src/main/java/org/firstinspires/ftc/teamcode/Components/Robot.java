@@ -75,6 +75,8 @@ public class Robot {
 
         localizer = new S4T_Localizer(hardwareMap, telemetry);
         localizer.setPacket(packet);
+
+        continuousMode = false;
     }
 
     public static double wrapHeading(double heading){

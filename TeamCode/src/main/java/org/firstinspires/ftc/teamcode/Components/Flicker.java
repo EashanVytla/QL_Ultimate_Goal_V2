@@ -62,11 +62,12 @@ public class Flicker {
         time.startTime();
     }
 
-    public void resetTime(){
+    public void reset(){
         time.reset();
+        flickState = 0;
     }
 
-    public void flick(){
+    public void flickStack(){
         if(flickState % 2 == 0){
             if(time.time() > flickerSpeed){
                 time.reset();
@@ -87,6 +88,24 @@ public class Flicker {
                     time.reset();
                     flickState++;
                 }
+            }
+        }
+    }
+
+    public void flick(){
+        if(flickState % 2 == 0){
+            if(time.time() > flickerSpeed){
+                time.reset();
+                flickState++;
+            }
+
+            flicker.setPosition(outPos);
+        }else if(flickState % 2 == 1){
+            flicker.setPosition(inPos);
+
+            if(time.time() > flickerSpeed){
+                time.reset();
+                flickState++;
             }
         }
     }

@@ -50,13 +50,14 @@ public class Shooter {
     public Caching_Servo converter;
     public static double continuousModePos = 0.40;
     public static double transitionModePos = 0.50;
-    public static double flickerModePos = 0.275;
+    public static double flickerModePos = 0.15;
 
     private double flapTesterPos = 0.7;
 
     private ElapsedTime time;
     private boolean prevContinuous;
     private boolean autoAllign = true;
+    private boolean manualFlickerToggle = false;
 
     SimpleMotorFeedforward feedforward =
             new SimpleMotorFeedforward(kS, kV);
@@ -228,16 +229,30 @@ public class Shooter {
                 //setFlywheelPower(1.0);
                 setFlywheelVelocity(flywheelTargetVelo, flywheelVelo);
 
-                if (gamepad1Ex.isPress(GamepadEx.Control.left_trigger)) {
+                if (gamepad1Ex.isPress(GamepadEx.Control.left_trigger) || gamepad2Ex.isPress(GamepadEx.Control.left_trigger)) {
                     Intake.pause = true;
-                    flicker.resetTime();
+                    flicker.reset();
                     flicker.flick = true;
                     xToggle = true;
                 }
 
+                if(gamepad1Ex.isPress(GamepadEx.Control.right_trigger) || gamepad2Ex.isPress(GamepadEx.Control.right_trigger)){
+                    flicker.reset();
+                }
+
+                if(gamepad1Ex.gamepad.right_trigger > 0.5 || gamepad2Ex.gamepad.right_trigger > 0.5){
+                    manualFlickerToggle = true;
+                }else{
+                    manualFlickerToggle = false;
+                }
+
+                if(manualFlickerToggle){
+                    flicker.flick();
+                }
+
                 if (flicker.flick) {
                     if (xToggle) {
-                        flicker.flick();
+                        flicker.flickStack();
                     }
                 } else {
                     Intake.pause = false;

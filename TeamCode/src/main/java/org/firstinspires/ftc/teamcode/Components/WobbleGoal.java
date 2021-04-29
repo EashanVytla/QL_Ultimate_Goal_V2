@@ -22,6 +22,7 @@ public class WobbleGoal {
     private Telemetry telemetry;
     boolean grabberToggle = false;
     int grabberLiftToggle = 0;
+    boolean liftToggle = false;
 
     public WobbleGoal(HardwareMap map, Telemetry telemetry){
         servo_lift = new Caching_Servo(map, "wobble_lift");
@@ -81,20 +82,26 @@ public class WobbleGoal {
             }
         }
 
-        /*if(gamepad2.isPress(GamepadEx.Control.left_stick_button)){
-            if(grabberLiftToggle == 0){
-                down();
-            }/*else if(grabberLiftToggle == 1){
+        if(gamepad2.isPress(GamepadEx.Control.x)){
+           liftToggle = !liftToggle;
+        }
+
+        if(liftToggle){
+            if(gamepad2.isPress(GamepadEx.Control.y)){
+                if(grabberLiftToggle == 0){
+                    down();
+                }/*else if(grabberLiftToggle == 1){
                 midLift();
-            }else if(grabberLiftToggle == 1){
-                lift();
-            }else if(grabberLiftToggle == 2){
-                DropOverWallLift();
+            }*/else if(grabberLiftToggle == 1){
+                    lift();
+                }else if(grabberLiftToggle == 2){
+                    DropOverWallLift();
+                }
+
+                grabberLiftToggle = (grabberLiftToggle + 1) % 3;
             }
-
-            grabberLiftToggle = (grabberLiftToggle + 1) % 3;
-        }*/
-
-        servo_lift.setPosition(0.0);
+        }else{
+            servo_lift.setPosition(0.0);
+        }
     }
 }

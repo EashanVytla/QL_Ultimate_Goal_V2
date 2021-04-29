@@ -47,7 +47,7 @@ public class LinearTeleOp extends LinearOpMode {
         while(opModeIsActive()){
             robot.updateBulkData();
 
-            if(gamepad1ex.isPress(GamepadEx.Control.start)){
+            if(gamepad1ex.isPress(GamepadEx.Control.back)){
                 robot.localizer.reset();
             }
 

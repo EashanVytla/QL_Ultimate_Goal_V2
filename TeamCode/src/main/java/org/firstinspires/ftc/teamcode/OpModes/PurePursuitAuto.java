@@ -25,10 +25,15 @@ public class PurePursuitAuto extends LinearOpMode {
     private boolean powershotBool = false;
 
     private Pose2d POWER_SHOT_POS = new Pose2d(-18.5d, 56.5d, Math.toRadians(0));
-    private Pose2d ZONE_1_POS = new Pose2d(19, 109.5, Math.toRadians(325));
-    private Pose2d ZONE_2_POS = new Pose2d(19, 109.5, Math.toRadians(325));
+    private Pose2d ZONE_1_POS = new Pose2d(17, 79, Math.toRadians(0));
+    private Pose2d ZONE_2_POS = new Pose2d(-4.5, 106.5, Math.toRadians(0));
     private Pose2d ZONE_4_POS = new Pose2d(19, 109.5, Math.toRadians(325));
-    private Pose2d WOBBLE_POS_2 = new Pose2d(1.69, 18.2, Math.toRadians(0));
+
+    private Pose2d ZONE_1_2_POS = new Pose2d(11, 72, Math.toRadians(0));
+    private Pose2d ZONE_2_2_POS = new Pose2d(-8.5, 97.5, Math.toRadians(0));
+    private Pose2d ZONE_4_2_POS = new Pose2d(11, 119.5, Math.toRadians(325));
+
+    private Pose2d WOBBLE_POS_2 = new Pose2d(1.1, 18.2, Math.toRadians(0));
 
     private int ringCase = 0;
 
@@ -141,10 +146,10 @@ public class PurePursuitAuto extends LinearOpMode {
                 case 2:
                     points.add(new CurvePoint(new Pose2d(-21d, 56d, Math.toRadians(0)), 1d, 1d, 25));
                     switch (ringCase){
-                        case 1:
+                        case 0:
                             points.add(new CurvePoint(ZONE_1_POS, 1d, 1d, 25));
                             break;
-                        case 2:
+                        case 1:
                             points.add(new CurvePoint(ZONE_2_POS, 1d, 1d, 25));
                             break;
                         case 4:
@@ -172,7 +177,7 @@ public class PurePursuitAuto extends LinearOpMode {
                     break;
                 case 3:
                     points.add(new CurvePoint(new Pose2d(19, 109.5, Math.toRadians(325)), 1d, 1d, 25));
-                    points.add(new CurvePoint(new Pose2d(-15, 54, Math.toRadians(0)), 1d, 1d, 25));
+                    points.add(new CurvePoint(new Pose2d(-30, 54, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(new Pose2d(-16.5, 18.7, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(WOBBLE_POS_2, 1d, 1d, 25));
 
@@ -209,14 +214,14 @@ public class PurePursuitAuto extends LinearOpMode {
 
                         //WOBBLE GOAL #2
                         switch (ringCase){
-                            case 1:
-                                points.add(new CurvePoint(ZONE_1_POS, 1d, 1d, 25));
+                            case 0:
+                                points.add(new CurvePoint(ZONE_1_2_POS, 1d, 1d, 25));
                                 break;
-                            case 2:
-                                points.add(new CurvePoint(ZONE_2_POS, 1d, 1d, 25));
+                            case 1:
+                                points.add(new CurvePoint(ZONE_2_2_POS, 1d, 1d, 25));
                                 break;
                             case 4:
-                                points.add(new CurvePoint(ZONE_4_POS, 1d, 1d, 25));
+                                points.add(new CurvePoint(ZONE_4_2_POS, 1d, 1d, 25));
                                 break;
                         }
 
@@ -230,14 +235,14 @@ public class PurePursuitAuto extends LinearOpMode {
 
                         //WOBBLE GOAL #2
                         switch (ringCase){
-                            case 1:
-                                points.add(new CurvePoint(new Pose2d(ZONE_1_POS.getX(), ZONE_1_POS.getY(), 0), 0.15d, 1d, 25));
+                            case 0:
+                                points.add(new CurvePoint(new Pose2d(ZONE_1_2_POS.getX(), ZONE_1_2_POS.getY(), 0), 0.15d, 1d, 25));
                                 break;
-                            case 2:
-                                points.add(new CurvePoint(new Pose2d(ZONE_2_POS.getX(), ZONE_2_POS.getY(), 0), 0.15d, 1d, 25));
+                            case 1:
+                                points.add(new CurvePoint(new Pose2d(ZONE_2_2_POS.getX(), ZONE_2_2_POS.getY(), 0), 0.15d, 1d, 25));
                                 break;
                             case 4:
-                                points.add(new CurvePoint(new Pose2d(ZONE_4_POS.getX(), ZONE_4_POS.getY(), 0), 0.15d, 1d, 25));
+                                points.add(new CurvePoint(new Pose2d(ZONE_4_2_POS.getX(), ZONE_4_2_POS.getY(), 0), 0.15d, 1d, 25));
                                 break;
                         }
                     }else{
@@ -251,14 +256,14 @@ public class PurePursuitAuto extends LinearOpMode {
 
                         //WOBBLE GOAL #2
                         switch (ringCase){
-                            case 1:
-                                points.add(new CurvePoint(new Pose2d(ZONE_1_POS.getX(), ZONE_1_POS.getY(), 0), 1d, 1d, 25));
+                            case 0:
+                                points.add(new CurvePoint(new Pose2d(ZONE_1_2_POS.getX(), ZONE_1_2_POS.getY(), 0), 1d, 1d, 25));
                                 break;
-                            case 2:
-                                points.add(new CurvePoint(new Pose2d(ZONE_2_POS.getX(), ZONE_2_POS.getY(), 0), 1d, 1d, 25));
+                            case 1:
+                                points.add(new CurvePoint(new Pose2d(ZONE_2_2_POS.getX(), ZONE_2_2_POS.getY(), 0), 1d, 1d, 25));
                                 break;
                             case 4:
-                                points.add(new CurvePoint(new Pose2d(ZONE_4_POS.getX(), ZONE_4_POS.getY(), 0), 1d, 1d, 25));
+                                points.add(new CurvePoint(new Pose2d(ZONE_4_2_POS.getX(), ZONE_4_2_POS.getY(), 0), 1d, 1d, 25));
                                 break;
                         }
                     }
