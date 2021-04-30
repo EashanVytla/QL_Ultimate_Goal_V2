@@ -37,6 +37,10 @@ public class PurePursuitAuto extends LinearOpMode {
 
     private int ringCase = 0;
 
+    private double powerShotAngle1 = 0.48749 + 0.0255;
+    private double powerShotAngle2 = 0.452 + 0.0205;
+    private double powerShotAngle3 = 0.4165 + 0.0205;
+
     @Override
     public void runOpMode() {
         Robot.setContinuous(false);
@@ -52,6 +56,10 @@ public class PurePursuitAuto extends LinearOpMode {
         robot.shooter.converter.setPosition(0.35);
 
         robot.intake.barUp();
+        robot.intake.write();
+
+        robot.shooter.setRotator(powerShotAngle1);
+        robot.intake.bar2.setPosition(1.0);
         robot.intake.write();
 
         robot.initializeWebcam();
@@ -72,6 +80,9 @@ public class PurePursuitAuto extends LinearOpMode {
         elapsedTime.startTime();
 
         while(opModeIsActive()){
+            if(state >= 2){
+                robot.intake.bar2.setPosition(robot.intake.barClosePos);
+            }
             robot.updateBulkData();
             ArrayList<CurvePoint> points = new ArrayList<>();
 
@@ -93,9 +104,10 @@ public class PurePursuitAuto extends LinearOpMode {
                 case 1:
                     points.add(new CurvePoint(new Pose2d(0, 0, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(new Pose2d(-16d, 27d, Math.toRadians(0)), 1d, 1d, 25));
-                    points.add(new CurvePoint(POWER_SHOT_POS, 0.5d, 1.0d, 25));
+                    points.add(new CurvePoint(POWER_SHOT_POS, 0.75d, 1.0d, 25));
 
                     robot.shooter.setFlap(0.033 + Shooter.FLAP_MIN);
+                    robot.shooter.stopper.setPosition(robot.shooter.stopperOpen);
 
                     if(powershotBool){
                         robot.wobbleGoal.servo_lift.setPosition(0);
@@ -109,7 +121,7 @@ public class PurePursuitAuto extends LinearOpMode {
                         }else{
                             if(elapsedTime.time() > 2.0){
                                 //THIRD POWERSHOT
-                                robot.shooter.setRotator(0.4165 + 0.0205);
+                                robot.shooter.setRotator(powerShotAngle3);
                                 if(elapsedTime.time() > 2.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
                                 }else if(elapsedTime.time() > 2.25){
@@ -117,7 +129,7 @@ public class PurePursuitAuto extends LinearOpMode {
                                 }
                             }else if(elapsedTime.time() > 1.0){
                                 //SECOND POWERSHOT
-                                robot.shooter.setRotator(0.452 + 0.0205);
+                                robot.shooter.setRotator(powerShotAngle2);
                                 if(elapsedTime.time() > 1.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
                                 }else if(elapsedTime.time() > 1.25){
@@ -125,7 +137,7 @@ public class PurePursuitAuto extends LinearOpMode {
                                 }
                             }else{
                                 //FIRST POWERSHOT
-                                robot.shooter.setRotator(0.48749 + 0.0255);
+                                robot.shooter.setRotator(powerShotAngle1);
                                 if(elapsedTime.time() > 0.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
                                 }else if(elapsedTime.time() > 0.25){

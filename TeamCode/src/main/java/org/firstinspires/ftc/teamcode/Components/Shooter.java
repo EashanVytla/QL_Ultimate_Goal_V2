@@ -25,6 +25,7 @@ public class Shooter {
     private boolean xToggle = false;
     private boolean aToggle = false;
     public Caching_Servo flap;
+    public Caching_Servo stopper;
 
     public static double flywheelTargetVelo = 2000;
 
@@ -48,15 +49,18 @@ public class Shooter {
     public static double kV = 1.075;
 
     public Caching_Servo converter;
-    public static double continuousModePos = 0.40;
-    public static double transitionModePos = 0.50;
-    public static double flickerModePos = 0.15;
+    public static double continuousModePos = 0.30;
+    public static double transitionModePos = 0.40;
+    public static double flickerModePos = 0.125;
 
     private double flapTesterPos = 0.7;
 
+    public double stopperIn = 0.92;
+    public double stopperOpen = 0.35;
+
     private ElapsedTime time;
     private boolean prevContinuous;
-    private boolean autoAllign = true;
+    private boolean autoAllign = false;
     private boolean manualFlickerToggle = false;
 
     SimpleMotorFeedforward feedforward =
@@ -68,6 +72,8 @@ public class Shooter {
         flap = new Caching_Servo(map, "flap");
         rotator = new Caching_Servo(map, "rotator");
         converter = new Caching_Servo(map, "converter");
+        stopper = new Caching_Servo(map, "stopper");
+        stopper.setPosition(stopperIn);
         time = new ElapsedTime();
         prevContinuous = Robot.isContinuous();
 
@@ -95,6 +101,7 @@ public class Shooter {
         rotator.write();
         flap.write();
         converter.write();
+        stopper.write();
     }
 
     public void startFlywheel(){
@@ -107,13 +114,24 @@ public class Shooter {
 
     public double getFlapPos(double distance){
         double newDist = Range.clip(distance, 75, 120);
-        double a = 3.02204665e-5 * Math.pow(newDist, 1);
+        /*double a = 3.02204665e-5 * Math.pow(newDist, 1);
         a += 1.16177569e-3 * Math.pow(newDist, 2);
         a += -3.26492093e-5 * Math.pow(newDist, 3);
         a += 3.84664299e-7 * Math.pow(newDist, 4);
         a += -2.14517587e-9 * Math.pow(newDist, 5);
         a += 4.67677460e-12 * Math.pow(newDist, 6);
-        a += 0.07692692731456108;
+        a += 0.07692692731456108;*/
+
+        double[] arr = new double[]{-6.69173811e-04, -2.41404719e-02,  7.05637256e-04,
+                -8.65084574e-06,  5.00081670e-08, -1.12346487e-10};
+
+        double a = 13.949544261905274;
+
+        for(int i = 0; i < arr.length; i++){
+            a += arr[i] * Math.pow(newDist, i + 1);
+        }
+
+        telemetry.addData("Regressions Position", a);
 
         return Range.clip(a, FLAP_MIN, FLAP_MAX);
     }
@@ -171,6 +189,7 @@ public class Shooter {
 
     //private boolean prevIntakeOn = false;
     private boolean switching = false;
+    private boolean stopperToggle = false;
 
     public double getRotatorPos(){
         return rotator.getPosition();
@@ -183,12 +202,22 @@ public class Shooter {
         packet.put("Flywheel Velocity", flywheelVelo);
         telemetry.addData("Dist to Ultimate Goal", currentPos.vec().distTo(Robot.ULTIMATE_GOAL_POS));
 
+        if(gamepad2Ex.isPress(GamepadEx.Control.b)){
+            stopperToggle = !stopperToggle;
+            if(stopperToggle){
+                stopper.setPosition(stopperOpen);
+            }else{
+                stopper.setPosition(stopperIn);
+            }
+        }
+
+
         if(gamepad1Ex.isPress(GamepadEx.Control.left_stick_button) || gamepad2Ex.isPress(GamepadEx.Control.a)) {
             aToggle = !aToggle;
         }
 
-        if(gamepad1Ex.isPress(GamepadEx.Control.right_trigger)){
-            autoAllign = true;
+        if(gamepad2Ex.isPress(GamepadEx.Control.dpad_right)){
+            autoAllign = !autoAllign;
         }
 
         if((Robot.isContinuous() && !prevContinuous)){
@@ -200,7 +229,6 @@ public class Shooter {
         if((!Robot.isContinuous() && prevContinuous)){
             switching = true;
             time.reset();
-            autoAllign = false;
         }
 
         if(Robot.isContinuous()){
@@ -229,7 +257,7 @@ public class Shooter {
                 //setFlywheelPower(1.0);
                 setFlywheelVelocity(flywheelTargetVelo, flywheelVelo);
 
-                if (gamepad1Ex.isPress(GamepadEx.Control.left_trigger) || gamepad2Ex.isPress(GamepadEx.Control.left_trigger)) {
+                if (gamepad2Ex.isPress(GamepadEx.Control.left_trigger)) {
                     Intake.pause = true;
                     flicker.reset();
                     flicker.flick = true;
