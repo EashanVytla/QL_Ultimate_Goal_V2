@@ -23,17 +23,16 @@ public class LinearTeleOp extends LinearOpMode {
     public boolean powerShots = false;
     private ElapsedTime time = new ElapsedTime();
     private boolean powerShotsKickout = false;
+    private int powerShotState = 0;
 
     @Override
     public void runOpMode(){
-        Robot.setContinuous(true);
         robot = new Robot(hardwareMap, telemetry);
         shooter = new Shooter(hardwareMap, telemetry);
 
         robot.localizer.k_strafe = kStrafe;
         robot.localizer.k_vert = kVert;
 
-        //robot.localizer.reset();
         gamepad1ex = new GamepadEx(gamepad1);
         gamepad2ex = new GamepadEx(gamepad2);
         robot.wobbleGoal.init();
@@ -58,8 +57,11 @@ public class LinearTeleOp extends LinearOpMode {
             }
 
             if(!powerShots){
+                //Regular Drive State
                 robot.operate(gamepad1ex, gamepad2ex);
             }else{
+                //Power Shots State
+
                 if(gamepad1ex.gamepad.left_stick_y > 0.3 ||
                         gamepad1ex.gamepad.left_stick_x > 0.3 ||
                         gamepad1ex.gamepad.right_stick_y > 0.3 ||
@@ -74,33 +76,13 @@ public class LinearTeleOp extends LinearOpMode {
 
                 if(powerShotsKickout){
                     robot.shooter.setFlywheelVelocity(1750, robot.shooter.getFlywheelVelcoity(robot.getData2()));
-                    robot.wobbleGoal.servo_lift.setPosition(0);
-                    if(time.time() > 3.0){
-                        robot.shooter.stopFlywheel();
-                        time.reset();
-                        robot.shooter.resetPID();
-                        robot.drive.resetPID();
-                        robot.wobbleGoal.autoLift();
-                        powerShots = false;
-                        powerShotsKickout = false;
-                    }else{
-                        if(time.time() > 2.0){
-                            //THIRD POWERSHOT
-                            robot.shooter.setRotator(0.4165 + 0.0205);
-                            if(time.time() > 2.5){
-                                robot.shooter.flicker.setPos(Flicker.inPos);
-                            }else if(time.time() > 2.25){
-                                robot.shooter.flicker.setPos(Flicker.outPos);
+
+                    switch(powerShotState){
+                        case 0:
+                            if(time.time() > 1.0){
+                                powerShotState = 1;
                             }
-                        }else if(time.time() > 1.0){
-                            //SECOND POWERSHOT
-                            robot.shooter.setRotator(0.452 + 0.0205);
-                            if(time.time() > 1.5){
-                                robot.shooter.flicker.setPos(Flicker.inPos);
-                            }else if(time.time() > 1.25){
-                                robot.shooter.flicker.setPos(Flicker.outPos);
-                            }
-                        }else{
+
                             //FIRST POWERSHOT
                             robot.shooter.setRotator(0.48749 + 0.0255);
                             if(time.time() > 0.5){
@@ -108,24 +90,52 @@ public class LinearTeleOp extends LinearOpMode {
                             }else if(time.time() > 0.25){
                                 robot.shooter.flicker.setPos(Flicker.outPos);
                             }
-                        }
+
+                            break;
+                        case 1:
+                            if(time.time() > 2.0){
+                                powerShotState = 2;
+                            }
+
+                            //SECOND POWERSHOT
+                            robot.shooter.setRotator(0.452 + 0.0205);
+                            if(time.time() > 1.5){
+                                robot.shooter.flicker.setPos(Flicker.inPos);
+                            }else if(time.time() > 1.25){
+                                robot.shooter.flicker.setPos(Flicker.outPos);
+                            }
+
+                            break;
+                        case 2:
+                            //THIRD POWERSHOT
+                            robot.shooter.setRotator(0.4165 + 0.0205);
+                            if(time.time() > 2.5){
+                                robot.shooter.flicker.setPos(Flicker.inPos);
+                            }else if(time.time() > 2.25){
+                                robot.shooter.flicker.setPos(Flicker.outPos);
+                            }
+
+                            if(time.time() > 3){
+                                powerShotState = 0;
+                                powerShotsKickout = false;
+                                powerShots = false;
+                                robot.shooter.flywheelMotor.setPower(0.0);
+                                time.reset();
+                            }
+
+                            break;
                     }
                 }else{
-                    if(robot.getPos().vec().distTo(target.vec()) < 1.0 && Math.abs(Robot.wrapHeading(robot.getPos().getHeading())) < Math.toRadians(1)){
-                        if(robot.shooter.getFlywheelVelcoity(robot.getData2()) > 1650){
-                            powerShotsKickout = true;
-                        }else{
-                            robot.shooter.setFlywheelVelocity(1750, robot.shooter.getFlywheelVelcoity(robot.getData2()));
-                            time.reset();
-                        }
+                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) > 1650 && robot.getPos().vec().distTo(target.vec()) < 1.0 && Math.abs(Robot.wrapHeading(robot.getPos().getHeading())) < Math.toRadians(1)){
+                        powerShotsKickout = true;
+                        powerShotState = 0;
                     }else{
+                        robot.shooter.setFlywheelVelocity(1750, robot.shooter.getFlywheelVelcoity(robot.getData2()));
                         time.reset();
                     }
                 }
                 robot.shooter.write();
             }
-
-            telemetry.addData("Time", time.time());
 
             telemetry.update();
             gamepad1ex.loop();

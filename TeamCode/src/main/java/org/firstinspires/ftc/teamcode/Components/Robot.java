@@ -46,8 +46,6 @@ public class Robot {
     Pose2d startPos = new Pose2d(0, 0, 0);
     public static final Vector2d ULTIMATE_GOAL_POS = new Vector2d(5, 136);
 
-    private static boolean continuousMode = false;
-
     TelemetryPacket packet;
     FtcDashboard dashboard;
 
@@ -75,8 +73,6 @@ public class Robot {
 
         localizer = new S4T_Localizer(hardwareMap, telemetry);
         localizer.setPacket(packet);
-
-        continuousMode = true;
     }
 
     public static double wrapHeading(double heading){
@@ -99,10 +95,6 @@ public class Robot {
         updateBulkData();
         updatePos();
 
-        if (gamepad1ex.isPress(GamepadEx.Control.dpad_left) || gamepad2ex.isPress(GamepadEx.Control.dpad_left)) {
-            continuousMode = !continuousMode;
-        }
-
         drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
 
         shooter.operate(gamepad1ex, gamepad2ex, getPos(), getData2(), packet);
@@ -111,21 +103,11 @@ public class Robot {
 
         telemetry.addData("Robot Position:", getPos());
 
-        telemetry.addLine("Shooting in " + (isContinuous() ? "continuous mode" : "flicker mode") + "...");
-
         dashboard.sendTelemetryPacket(packet);
         drive.write();
         intake.write();
         shooter.write();
         wobbleGoal.write();
-    }
-
-    public static boolean isContinuous(){
-        return continuousMode;
-    }
-
-    public static void setContinuous(boolean val){
-        continuousMode = val;
     }
 
     public double getVelocityXMetersPerSecond(){

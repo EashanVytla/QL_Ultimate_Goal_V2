@@ -13,8 +13,7 @@ public class Intake {
     public boolean toggle;
     public static boolean isOff = true;
     public static boolean pause = false;
-    public Caching_Servo bar;
-    public Caching_Servo bar2;
+    //public Caching_Servo bar;
 
     private double barUp = 0.338;
     private double barDown = 0.69;
@@ -30,16 +29,15 @@ public class Intake {
         pause = false;
         intake[0] = new Caching_Motor(map, "intake_left");
         intake[1] = new Caching_Motor(map, "intake_right");
-        bar = new Caching_Servo(map, "bar");
-        bar2 = new Caching_Servo(map, "bar2");
+        //bar = new Caching_Servo(map, "bar");
     }
 
     public void barDown(){
-        bar.setPosition(barDown);
+        //bar.setPosition(barDown);
     }
 
     public void barUp(){
-        bar.setPosition(barUp);
+        //bar.setPosition(barUp);
     }
 
     public void setPower(double power){
@@ -50,8 +48,7 @@ public class Intake {
     public void write(){
         intake[0].write();
         intake[1].write();
-        bar.write();
-        bar2.write();
+        //bar.write();
     }
 
     public void operate(GamepadEx gamepad, GamepadEx gamepad2){
@@ -63,16 +60,10 @@ public class Intake {
             barToggle = !barToggle;
         }
 
-        if(gamepad.gamepad.left_trigger > 0.5){
-            bar2.setPosition(barClosePos);
-        }else{
-            bar2.setPosition(barOpenPos);
-        }
-
         if (barToggle) {
-            bar.setPosition(barMid);
+            //bar.setPosition(barMid);
         }else{
-            bar.setPosition(barDown);
+            //bar.setPosition(barDown);
         }
 
         if((gamepad.gamepad.left_bumper || gamepad2.gamepad.left_bumper) && !pause){

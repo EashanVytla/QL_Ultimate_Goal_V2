@@ -43,7 +43,6 @@ public class PurePursuitAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Robot.setContinuous(false);
         elapsedTime = new ElapsedTime();
         robot = new Robot(hardwareMap, telemetry);
         robot.localizer.reset();
@@ -53,13 +52,11 @@ public class PurePursuitAuto extends LinearOpMode {
         robot.wobbleGoal.servo_lift.write();
         robot.wobbleGoal.servo_grab.write();
 
-        robot.shooter.converter.setPosition(0.35);
 
         robot.intake.barUp();
         robot.intake.write();
 
         robot.shooter.setRotator(powerShotAngle1);
-        robot.intake.bar2.setPosition(1.0);
         robot.intake.write();
 
         robot.initializeWebcam();
@@ -80,9 +77,6 @@ public class PurePursuitAuto extends LinearOpMode {
         elapsedTime.startTime();
 
         while(opModeIsActive()){
-            if(state >= 2){
-                robot.intake.bar2.setPosition(robot.intake.barClosePos);
-            }
             robot.updateBulkData();
             ArrayList<CurvePoint> points = new ArrayList<>();
 
@@ -112,7 +106,7 @@ public class PurePursuitAuto extends LinearOpMode {
                     if(powershotBool){
                         robot.wobbleGoal.servo_lift.setPosition(0);
                         if(elapsedTime.time() > 3.0){
-                            robot.shooter.stopFlywheel();
+                            robot.shooter.flywheelMotor.setPower(0.0);
                             elapsedTime.reset();
                             robot.shooter.resetPID();
                             robot.drive.resetPID();
@@ -169,8 +163,6 @@ public class PurePursuitAuto extends LinearOpMode {
                             break;
                     }
 
-                    robot.shooter.flicker.setIdlePos(robot.shooter.getRotatorPos());
-
                     if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 1.0){
                         if(elapsedTime.time() > 1.0){
                             elapsedTime.reset();
@@ -192,8 +184,6 @@ public class PurePursuitAuto extends LinearOpMode {
                     points.add(new CurvePoint(new Pose2d(-30, 54, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(new Pose2d(-16.5, 18.7, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(WOBBLE_POS_2, 1d, 1d, 25));
-
-                    robot.shooter.converter.setPosition(Shooter.continuousModePos);
 
                     if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 1.0){
                         if(elapsedTime.time() > 1.0){
@@ -222,7 +212,7 @@ public class PurePursuitAuto extends LinearOpMode {
 
                     if(robot.getPos().getY() > 45){
                         robot.intake.setPower(0.0);
-                        robot.shooter.stopFlywheel();
+                        robot.shooter.flywheelMotor.setPower(0.0);
 
                         //WOBBLE GOAL #2
                         switch (ringCase){
@@ -238,8 +228,6 @@ public class PurePursuitAuto extends LinearOpMode {
                         }
 
                     }else if(robot.getPos().getY() > 20){
-                        robot.shooter.converter.setPosition(robot.shooter.continuousModePos);
-                        robot.shooter.flicker.setIdlePos(robot.shooter.getRotatorPos());
 
                         robot.shooter.flap.setPosition(robot.shooter.getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(robot.getPos().vec())));
                         robot.shooter.setFlywheelVelocity(2000, flywheelVelo);
@@ -258,9 +246,6 @@ public class PurePursuitAuto extends LinearOpMode {
                                 break;
                         }
                     }else{
-                        robot.shooter.converter.setPosition(robot.shooter.continuousModePos);
-                        robot.shooter.flicker.setIdlePos(robot.shooter.getRotatorPos());
-
                         robot.shooter.flap.setPosition(robot.shooter.getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(robot.getPos().vec())));
                         //robot.shooter.startFlywheel();
                         robot.shooter.setFlywheelVelocity(2000, flywheelVelo);
