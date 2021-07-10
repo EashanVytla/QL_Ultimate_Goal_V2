@@ -27,6 +27,15 @@ public class Caching_Motor {
         motor = hardwareMap.get(DcMotorEx.class, name);
     }
 
+    public Caching_Motor(HardwareMap hardwareMap, String name, double EPSILON){
+        this.hardwareMap = hardwareMap;
+        this.name = name;
+
+        this.EPSILON = EPSILON;
+
+        motor = hardwareMap.get(DcMotorEx.class, name);
+    }
+
     public void setPower(double power){
         if (Math.abs(prev_power - power) > EPSILON){
             query = power;

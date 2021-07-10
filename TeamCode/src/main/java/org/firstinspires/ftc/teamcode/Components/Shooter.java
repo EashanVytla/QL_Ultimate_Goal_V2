@@ -29,24 +29,32 @@ public class Shooter {
     public static double flywheelTargetVelo = 2000; // Target velocity for the flywheel
 
     // The physical servo constraints for the flap
-    public static final double FLAP_MIN = 0.725;
-    public static final double FLAP_MAX = 0.78;
+    public static final double FLAP_MIN = 0.18;
+    public static final double FLAP_MAX = 0.88;
 
-    private final double ROTATOR_MIN = 0.28; //Left
-    private final double ROTATOR_MAX = 0.69; //Right
-    public static double ROTATOR_0 = 0.458;
     private final double DEGREES_TO_TICKS = (130/.825);
     private double flapTesterPos = 0.75;
 
     private final PIDFController flywheelPIDController; // PID controller for the Flywheel
     private final SimpleMotorFeedforward feedForward; // Flywheel feed-forward controller
 
-    private Caching_Servo rotator; //Bucket rotator servo
+    private final Caching_Motor rotator; //Bucket rotation motor
+    private final Ma3_Encoder rotatorEncoder; //Bucket rotation encoder
+    private final PIDFController rotatorPIDController; // PID controller for the Rotator
+    private final double ROTATOR_MIN;
+    private final double ROTATOR_0; //Rotator 0
+    private final double Ma3_Offset; //Encoder Offset in Radians
+    private final double ROTATOR_MAX; //Rotator Max Angle
 
     //PID constants for the flywheel (static for dashboard live tuning purposes)
     public static double kpF = 0.01;
     public static double kiF = 0;
     public static double kdF = 0.0001;
+
+    //PID constants for the Bucket Rotator (static for dashboard live tuning purposes)
+    public static double kpR = 6;
+    public static double kiR = 0;
+    public static double kdR = 0.1;
 
     //Feed-forward constants for the flywheel (static for dashboard live tuning purposes)
     public static double kS = 0.0;
@@ -60,16 +68,23 @@ public class Shooter {
         flywheelMotor = new Caching_Motor(map, "shooter");
         flicker = new Flicker(map, telemetry);
         flap = new Caching_Servo(map, "flap");
-        rotator = new Caching_Servo(map, "rotator");
+        rotator = new Caching_Motor(map, "rotator", 1e-6);
         stopper = new Caching_Servo(map, "stopper");
+        rotatorEncoder = new Ma3_Encoder(map, "rotatorEncoder");
         stopper.setPosition(stopperIn);
 
-        rotator.setPosition(ROTATOR_0);
         flap.setPosition(0.2);
         write();
 
+        ROTATOR_MIN = Math.toRadians(125);
+        ROTATOR_MAX = Math.toRadians(165);
+        ROTATOR_0 = Math.toRadians(145);
+        Ma3_Offset = 0.264 * (2 * Math.PI);
+
         flywheelPIDController = new PIDFController(new PIDCoefficients(kpF, kiF, kdF));
         feedForward = new SimpleMotorFeedforward(kS, kV);
+
+        rotatorPIDController = new PIDFController(new PIDCoefficients(kpR, kiR, kdR));
 
         flywheelMotor.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -93,10 +108,10 @@ public class Shooter {
     public double getFlapPos(double distance){
         double newDist = Range.clip(distance, 75, 120);
 
-        double[] arr = new double[]{-6.69173811e-04, -2.41404719e-02,  7.05637256e-04,
-                -8.65084574e-06,  5.00081670e-08, -1.12346487e-10};
+        double[] arr = new double[]{2.52218538e-05,  9.56110472e-04, -2.80182843e-05,
+                3.35131026e-07, -1.85107487e-09,  3.90995297e-12};
 
-        double a = 13.949544261905274;
+        double a = 0.3913533087607506;
 
         for(int i = 0; i < arr.length; i++){
             a += arr[i] * Math.pow(newDist, i + 1);
@@ -119,23 +134,55 @@ public class Shooter {
             heading -= 2 * Math.PI;
         }
 
-        double tick_offset = Math.toDegrees(targetangle - heading) / DEGREES_TO_TICKS;
+        double offset = targetangle - heading;
 
-        double pos = Range.clip(ROTATOR_0 + tick_offset, ROTATOR_MIN, ROTATOR_MAX);
+        setRotator(-offset);
+    }
 
-        if(currentPos.getY() >= 84){
-            rotator.setPosition(ROTATOR_0);
-        }else{
-            rotator.setPosition(pos);
+    public void setRotator(Pose2d currentPos, RevBulkData data) {
+        double targetangle = Math.atan2((Robot.ULTIMATE_GOAL_POS.getX() - currentPos.getX()), (Robot.ULTIMATE_GOAL_POS.getY() - currentPos.getY()));
+        double heading = currentPos.getHeading();
+
+        if(heading <  2 * Math.PI && heading >= Math.PI){
+            heading -= 2 * Math.PI;
         }
+
+        double offset = targetangle - heading;
+
+        setRotator(-offset, data);
     }
 
     public void setFlap(double pos){
         flap.setPosition(pos, 1e-6);
     }
 
-    public void setRotator(double targetTick) {
-        rotator.setPosition(Range.clip(targetTick, ROTATOR_MIN, ROTATOR_MAX), 1e-6);
+    //Target is 0-(2*PI) and 0-(-2*PI)
+    //Negative values represent counter clockwise and positive values represent clockwise
+    public void setRotator(double target) {
+        if(target > Math.PI){
+            target -= 2 * Math.PI;
+        }
+
+        target = Range.clip(target + ROTATOR_0, ROTATOR_MIN, ROTATOR_MAX);
+        rotatorPIDController.setTargetPosition(target);
+
+        telemetry.addData("target", Math.toDegrees(target));
+
+        rotator.setPower(-rotatorPIDController.update(getRotatorPos()));
+        telemetry.addData("Error", Math.toDegrees(rotatorPIDController.getLastError()));
+    }
+
+    public void setRotator(double target, RevBulkData data) {
+        if(target > Math.PI){
+            target -= 2 * Math.PI;
+        }
+
+        target = Range.clip(target + ROTATOR_0, ROTATOR_MIN, ROTATOR_MAX);
+        rotatorPIDController.setTargetPosition(target);
+
+        rotator.setPower(-rotatorPIDController.update(getRotatorPos(data)));
+        telemetry.addData("Rotator POsition", getRotatorPos());
+        telemetry.addData("Error", Math.toDegrees(rotatorPIDController.getLastError()));
     }
 
     public void setFlywheelVelocity(double targetVelo, double currentVelo){
@@ -157,11 +204,17 @@ public class Shooter {
     }
 
     public double getRotatorPos(){
-        return rotator.getPosition();
+        telemetry.addData("RAW", rotatorEncoder.getRawValue());
+        return rotatorEncoder.getRadians(ROTATOR_0 - Ma3_Offset);
     }
 
-    public void operate(GamepadEx gamepad1Ex, GamepadEx gamepad2Ex, Pose2d currentPos, RevBulkData data, TelemetryPacket packet){
-        double flywheelVelo = getFlywheelVelcoity(data);
+    public double getRotatorPos(RevBulkData data){
+        telemetry.addData("RAW", rotatorEncoder.getRawValue());
+        return rotatorEncoder.getRadians(ROTATOR_0 - Ma3_Offset, data);
+    }
+
+    public void operate(GamepadEx gamepad1Ex, GamepadEx gamepad2Ex, Pose2d currentPos, RevBulkData eHubdata, RevBulkData cHubData, TelemetryPacket packet){
+        double flywheelVelo = getFlywheelVelcoity(eHubdata);
 
         telemetry.addData("Flywheel Velocity", flywheelVelo);
         packet.put("Flywheel Velocity", flywheelVelo);
@@ -184,12 +237,6 @@ public class Shooter {
         if (flywheelToggle) {
             setFlywheelVelocity(flywheelTargetVelo, flywheelVelo);
 
-            if (gamepad2Ex.isPress(GamepadEx.Control.left_trigger)) {
-                Intake.pause = true;
-                flicker.reset();
-                flicker.flick = true;
-            }
-
             //Only occurs one to reset the flicker timer and position
             if(gamepad1Ex.isPress(GamepadEx.Control.left_trigger) || gamepad2Ex.isPress(GamepadEx.Control.left_trigger)){
                 flicker.reset();
@@ -199,21 +246,21 @@ public class Shooter {
             if(gamepad1Ex.gamepad.left_trigger > 0.5 || gamepad2Ex.gamepad.left_trigger > 0.5){
                 flicker.flick();
             }else{
-                flicker.setPos(Flicker.outPos);
+                flicker.setPos(Flicker.inPos);
             }
         }else{
             Intake.pause = false;
             flywheelMotor.setPower(0.0);
         }
 
-        //setFlap(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())));
+        setFlap(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())) - 0.001);
         setRotator(currentPos);
 
         telemetry.addData("Flap Regression Value", getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())));
 
         //Flap Regression Tuning
         //_________________________________________________________
-        if(gamepad2Ex.gamepad.dpad_up){
+        /*if(gamepad2Ex.gamepad.dpad_up){
             flapTesterPos += 0.0001;
         }
 
@@ -221,7 +268,7 @@ public class Shooter {
             flapTesterPos -= 0.0001;
         }
 
-        flap.setPosition(flapTesterPos);
+        setFlap(flapTesterPos);*/
         //----------------------------------------------------------
         telemetry.addData("Flap Position", flapTesterPos);
     }

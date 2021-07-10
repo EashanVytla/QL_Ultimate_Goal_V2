@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -41,15 +42,20 @@ public class Robot {
 
     private Telemetry telemetry;
 
+    public boolean inverse = false;
+
     OpenCvCamera webcam;
     RingDetectionPipelineV2 detector;
     Pose2d startPos = new Pose2d(0, 0, 0);
-    public static final Vector2d ULTIMATE_GOAL_POS = new Vector2d(5, 136);
+    public static Vector2d ULTIMATE_GOAL_POS;
+    private static boolean blue = false;
 
     TelemetryPacket packet;
     FtcDashboard dashboard;
 
     public Robot(HardwareMap map, Telemetry telemetry){
+        blue = false;
+        ULTIMATE_GOAL_POS = new Vector2d(3, 136);
         this.hardwareMap = map;
         this.telemetry = telemetry;
 
@@ -75,6 +81,15 @@ public class Robot {
         localizer.setPacket(packet);
     }
 
+    public void blue(){
+        blue = true;
+        ULTIMATE_GOAL_POS = new Vector2d(-10, 136);
+    }
+
+    public static boolean isBlue(){
+        return blue;
+    }
+
     public static double wrapHeading(double heading){
         if(heading > Math.PI){
             return heading - (2 * Math.PI);
@@ -95,13 +110,14 @@ public class Robot {
         updateBulkData();
         updatePos();
 
-        drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
+        drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + (blue ? -Math.toRadians(90) : Math.toRadians(90)));
 
-        shooter.operate(gamepad1ex, gamepad2ex, getPos(), getData2(), packet);
+        shooter.operate(gamepad1ex, gamepad2ex, getPos(), getData2(), getData(), packet);
         intake.operate(gamepad1ex, gamepad2ex);
         wobbleGoal.operate(gamepad1ex, gamepad2ex);
 
         telemetry.addData("Robot Position:", getPos());
+        telemetry.addData("Ultimate Goal Position", ULTIMATE_GOAL_POS);
 
         dashboard.sendTelemetryPacket(packet);
         drive.write();
@@ -223,7 +239,11 @@ public class Robot {
     }
 
     public Pose2d getPos(){
-        return new Pose2d(localizer.getPose().getX() + startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());
+        if(inverse){
+            return new Pose2d(-localizer.getPose().getX() - startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());
+        }else{
+            return new Pose2d(localizer.getPose().getX() + startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());
+        }
     }
 
     public Pose2d getStartPos(){
