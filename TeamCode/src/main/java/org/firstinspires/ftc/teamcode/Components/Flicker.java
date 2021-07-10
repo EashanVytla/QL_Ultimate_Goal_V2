@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @Config
 public class Flicker {
-    public static double outPos = 0.281;
+    public static double outPos = 0.21;
     public static double inPos = 0.345;
     public static double flickerSpeed = 0.1;
 
@@ -29,29 +29,7 @@ public class Flicker {
         time = new ElapsedTime();
         time.reset();
 
-        if(Robot.isContinuous()){
-            setIdlePos(Shooter.ROTATOR_0);
-        }else{
-            setPos(inPos);
-        }
-    }
-
-    private double getFlickerPosIdle(double rotationPos){
-        double pos = 4.03262 * Math.pow(rotationPos, 2);
-        pos += -3.41451 * rotationPos;
-        pos += 1.33696;
-
-        telemetry.addData("Rotation Pos", rotationPos);
-
-        if(rotationPos < 0.4){
-            return 0.6;
-        }else{
-            return pos;
-        }
-    }
-
-    public void setIdlePos(double rotationPos){
-        setPos(getFlickerPosIdle(rotationPos));
+        flicker.setPosition(inPos);
     }
 
     public void setPos(double pos){
@@ -62,11 +40,12 @@ public class Flicker {
         time.startTime();
     }
 
-    public void resetTime(){
+    public void reset(){
         time.reset();
+        flickState = 0;
     }
 
-    public void flick(){
+    public void flickStack(){
         if(flickState % 2 == 0){
             if(time.time() > flickerSpeed){
                 time.reset();
@@ -87,6 +66,24 @@ public class Flicker {
                     time.reset();
                     flickState++;
                 }
+            }
+        }
+    }
+
+    public void flick(){
+        if(flickState % 2 == 0){
+            if(time.time() > flickerSpeed){
+                time.reset();
+                flickState++;
+            }
+
+            flicker.setPosition(outPos);
+        }else if(flickState % 2 == 1){
+            flicker.setPosition(inPos);
+
+            if(time.time() > flickerSpeed){
+                time.reset();
+                flickState++;
             }
         }
     }

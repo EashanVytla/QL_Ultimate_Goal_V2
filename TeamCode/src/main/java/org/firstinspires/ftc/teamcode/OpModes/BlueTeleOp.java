@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.Components.Shooter;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
-@TeleOp(name = "TeleOp")
-public class LinearTeleOp extends LinearOpMode {
+@TeleOp(name = "Blue TeleOp")
+public class BlueTeleOp extends LinearOpMode {
     Robot robot;
     Shooter shooter;
     GamepadEx gamepad1ex;
@@ -29,6 +29,8 @@ public class LinearTeleOp extends LinearOpMode {
     public void runOpMode(){
         robot = new Robot(hardwareMap, telemetry);
         shooter = new Shooter(hardwareMap, telemetry);
+
+        robot.blue();
 
         robot.localizer.k_strafe = kStrafe;
         robot.localizer.k_vert = kVert;
