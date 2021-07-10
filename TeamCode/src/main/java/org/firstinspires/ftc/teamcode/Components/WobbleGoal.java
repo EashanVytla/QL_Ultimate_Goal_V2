@@ -8,100 +8,133 @@ import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class WobbleGoal {
-    public final double clamp_pos = 0;
-    public final double grabber_idle = 0.489;
-    public final double release_pos = 0.8385;
-    public final double lift_pos = 0.59;
-    public final double drop_over_lift_pos = 0.223;
-    public final double auto_lift_pos = 0.552;
-    public final double down_pos = 0.18;
+    public final double clamp_posR = 0;
+    public final double release_posR = 0.8385;
+    public final double lift_posR = 0.61;
+    public final double drop_over_lift_posR = 0.49;
+    public final double auto_lift_posR = 0.3;
+    public final double down_posR = 0.14;
 
-    public Caching_Servo servo_lift;
-    public Caching_Servo servo_grab;
+    public final double clamp_posL = 0.69;
+    public final double release_posL = 0;
+    public final double lift_posL = 0.18;
+    public final double drop_over_lift_posL = 0.28;
+    public final double auto_lift_posL = 0.52;
+    public final double down_posL = 0.653;
+
+
+    public Caching_Servo servo_liftRight;
+    public Caching_Servo servo_grabRight;
+    public Caching_Servo servo_grabLeft;
+    public Caching_Servo servo_liftLeft;
 
     private Telemetry telemetry;
     boolean grabberToggle = false;
     int grabberLiftToggle = 0;
     boolean liftToggle = false;
 
-    public WobbleGoal(HardwareMap map, Telemetry telemetry){
-        servo_lift = new Caching_Servo(map, "wobble_lift");
-        servo_grab = new Caching_Servo(map, "wobble_grab");
+    public WobbleGoal(HardwareMap map, Telemetry telemetry) {
+        servo_liftRight = new Caching_Servo(map, "wobble_liftRight");
+        servo_grabRight = new Caching_Servo(map, "wobble_grabRight");
+        servo_liftLeft = new Caching_Servo(map, "wobble_liftLeft");
+        servo_grabLeft = new Caching_Servo(map, "wobble_grabLeft");
 
+        servo_liftRight.setPosition(lift_posR);
+        servo_liftRight.write();
         this.telemetry = telemetry;
     }
 
-    public void init(){
-        servo_grab.setPosition(release_pos);
-        servo_lift.setPosition(lift_pos);
-        servo_lift.write();
-        servo_grab.write();
+
+    public void clamp() {
+        if(Robot.isBlue()){
+            servo_grabLeft.setPosition(clamp_posL);
+        }else{
+            servo_grabRight.setPosition(clamp_posR);
+        }
     }
 
-    public void clamp(){
-        servo_grab.setPosition(clamp_pos);
+    public void write() {
+        if(Robot.isBlue()){
+            servo_grabLeft.write();
+            servo_liftLeft.write();
+        }else{
+            servo_grabRight.write();
+            servo_liftRight.write();
+        }
     }
 
-    public void kick() {
-        servo_grab.setPosition(release_pos);
+    public void release() {
+        if(Robot.isBlue()){
+            servo_grabLeft.setPosition(release_posL);
+        }else{
+            servo_grabRight.setPosition(release_posR);
+        }
     }
 
-    public void write(){
-        servo_grab.write();
-        servo_lift.write();
+    public void lift() {
+        if(Robot.isBlue()){
+            servo_liftLeft.setPosition(lift_posL);
+        }else{
+            servo_liftRight.setPosition(lift_posR);
+        }
     }
 
-    public void release(){
-        servo_grab.setPosition(release_pos);
+    public void autoLift() {
+        if (Robot.isBlue()) {
+            servo_liftLeft.setPosition(auto_lift_posL);
+        } else {
+            servo_liftRight.setPosition(auto_lift_posR);
+        }
     }
 
-    public void lift(){
-        servo_lift.setPosition(lift_pos);
+    public void down() {
+        if(Robot.isBlue()){
+            servo_liftLeft.setPosition(down_posL);
+        }else{
+            servo_liftRight.setPosition(down_posR);
+        }
     }
 
-    public void autoLift(){
-        servo_lift.setPosition(auto_lift_pos);
+    public void dropOverWallLift() {
+        if(Robot.isBlue()){
+            servo_liftLeft.setPosition(drop_over_lift_posL);
+        }else{
+            servo_liftRight.setPosition(drop_over_lift_posR);
+        }
     }
 
-    public void down(){
-        servo_lift.setPosition(down_pos);
-    }
-
-    public void DropOverWallLift(){
-        servo_lift.setPosition(drop_over_lift_pos);
-    }
-
-    public void operate(GamepadEx gamepad, GamepadEx gamepad2){
-        if(gamepad.isPress(GamepadEx.Control.right_stick_button)){
+    public void operate(GamepadEx gamepad, GamepadEx gamepad2) {
+        if (gamepad.isPress(GamepadEx.Control.right_stick_button)) {
             grabberToggle = !grabberToggle;
 
-            if(grabberToggle){
+            if (grabberToggle) {
                 clamp();
-            }else{
-                kick();
+            } else {
+                release();
             }
         }
 
-        if(gamepad2.isPress(GamepadEx.Control.x)){
-           liftToggle = !liftToggle;
+        if (gamepad.isPress(GamepadEx.Control.dpad_left)) {
+            liftToggle = !liftToggle;
         }
 
-        if(liftToggle){
-            if(gamepad2.isPress(GamepadEx.Control.y)){
-                if(grabberLiftToggle == 0){
+        if (liftToggle) {
+            if (gamepad.isPress(GamepadEx.Control.left_stick_button)) {
+                if (grabberLiftToggle == 0) {
                     down();
-                }/*else if(grabberLiftToggle == 1){
-                midLift();
-            }*/else if(grabberLiftToggle == 1){
+                } else if (grabberLiftToggle == 1) {
                     lift();
-                }else if(grabberLiftToggle == 2){
-                    DropOverWallLift();
+                } else if (grabberLiftToggle == 2) {
+                    dropOverWallLift();
                 }
-
                 grabberLiftToggle = (grabberLiftToggle + 1) % 3;
             }
-        }else{
-            servo_lift.setPosition(0.0);
+        } else {
+            if(Robot.isBlue()){
+                servo_liftLeft.setPosition(0.0);
+            }else {
+                servo_liftRight.setPosition(0.0);
+            }
         }
     }
 }

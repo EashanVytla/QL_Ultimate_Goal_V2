@@ -35,7 +35,6 @@ public class LinearTeleOp extends LinearOpMode {
 
         gamepad1ex = new GamepadEx(gamepad1);
         gamepad2ex = new GamepadEx(gamepad2);
-        robot.wobbleGoal.init();
         robot.intake.barDown();
 
         waitForStart();
@@ -136,6 +135,8 @@ public class LinearTeleOp extends LinearOpMode {
                 }
                 robot.shooter.write();
             }
+
+
 
             telemetry.update();
             gamepad1ex.loop();

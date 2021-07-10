@@ -47,14 +47,11 @@ public class PurePursuitAuto extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry);
         robot.localizer.reset();
 
-        robot.wobbleGoal.servo_grab.setPosition(robot.wobbleGoal.clamp_pos);
+        robot.wobbleGoal.servo_grabRight.setPosition(robot.wobbleGoal.clamp_posR);
         robot.wobbleGoal.lift();
-        robot.wobbleGoal.servo_lift.write();
-        robot.wobbleGoal.servo_grab.write();
-
+        
 
         robot.intake.barUp();
-        robot.intake.write();
 
         robot.shooter.setRotator(powerShotAngle1);
         robot.intake.write();
@@ -101,10 +98,9 @@ public class PurePursuitAuto extends LinearOpMode {
                     points.add(new CurvePoint(POWER_SHOT_POS, 0.75d, 1.0d, 25));
 
                     robot.shooter.setFlap(0.033 + Shooter.FLAP_MIN);
-                    robot.shooter.stopper.setPosition(robot.shooter.stopperOpen);
 
                     if(powershotBool){
-                        robot.wobbleGoal.servo_lift.setPosition(0);
+                        robot.wobbleGoal.servo_liftRight.setPosition(0);
                         if(elapsedTime.time() > 3.0){
                             robot.shooter.flywheelMotor.setPower(0.0);
                             elapsedTime.reset();

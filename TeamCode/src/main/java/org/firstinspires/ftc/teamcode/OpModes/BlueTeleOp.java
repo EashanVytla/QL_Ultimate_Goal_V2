@@ -37,7 +37,6 @@ public class BlueTeleOp extends LinearOpMode {
 
         gamepad1ex = new GamepadEx(gamepad1);
         gamepad2ex = new GamepadEx(gamepad2);
-        robot.wobbleGoal.init();
         robot.intake.barDown();
 
         waitForStart();

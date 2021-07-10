@@ -230,7 +230,7 @@ public class Shooter {
         }
 
 
-        if(gamepad1Ex.isPress(GamepadEx.Control.left_stick_button) || gamepad2Ex.isPress(GamepadEx.Control.a)) {
+        if(gamepad1Ex.isPress(GamepadEx.Control.right_trigger) || gamepad2Ex.isPress(GamepadEx.Control.a)) {
             flywheelToggle = !flywheelToggle;
         }
 
