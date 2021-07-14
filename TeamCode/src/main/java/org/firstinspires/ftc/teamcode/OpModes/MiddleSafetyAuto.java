@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RobotMovement;
 import java.util.ArrayList;
 
 @Autonomous
-public class PurePursuitAuto extends LinearOpMode {
+public class MiddleSafetyAuto extends LinearOpMode {
     int state = 0;
     ElapsedTime elapsedTime;
     boolean gtp = false;
@@ -29,11 +29,11 @@ public class PurePursuitAuto extends LinearOpMode {
     private Pose2d ZONE_2_POS = new Pose2d(-4.5, 103.5, Math.toRadians(0));
     private Pose2d ZONE_4_POS = new Pose2d(19, 109.5, Math.toRadians(325));
 
-    private Pose2d ZONE_1_2_POS = new Pose2d(11, 72, Math.toRadians(0));
-    private Pose2d ZONE_2_2_POS = new Pose2d(-8.5, 95.5, Math.toRadians(0));
-    private Pose2d ZONE_4_2_POS = new Pose2d(11, 119.5, Math.toRadians(325));
+    //private Pose2d ZONE_1_2_POS = new Pose2d(11, 72, Math.toRadians(0));
+    //private Pose2d ZONE_2_2_POS = new Pose2d(-8.5, 95.5, Math.toRadians(0));
+    //private Pose2d ZONE_4_2_POS = new Pose2d(11, 119.5, Math.toRadians(325));
 
-    private Pose2d WOBBLE_POS_2 = new Pose2d(0.5, 18.2, Math.toRadians(0));
+    //private Pose2d WOBBLE_POS_2 = new Pose2d(0.5, 18.2, Math.toRadians(0));
     private Pose2d PARK = new Pose2d(-6.6, 75.3, Math.toRadians(0));
 
     private int ringCase = 0;
@@ -46,6 +46,7 @@ public class PurePursuitAuto extends LinearOpMode {
     public void runOpMode() {
         elapsedTime = new ElapsedTime();
         robot = new Robot(hardwareMap, telemetry);
+        robot.setStartPose(new Pose2d(15,0,0));
         robot.localizer.reset();
 
         robot.intake.barUp();
@@ -202,114 +203,6 @@ public class PurePursuitAuto extends LinearOpMode {
 
                     break;
                 case 3:
-                    points.add(new CurvePoint(new Pose2d(19, 109.5, Math.toRadians(325)), 1d, 1d, 25));
-                    points.add(new CurvePoint(new Pose2d(-30, 54, Math.toRadians(0)), 1d, 1d, 25));
-                    points.add(new CurvePoint(new Pose2d(-17.5, 18.7, Math.toRadians(0)), 1.0d, 1d, 25));
-                    points.add(new CurvePoint(WOBBLE_POS_2, 1d, 1d, 25));
-
-                    if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 1.0){
-                        if(elapsedTime.time() > 1.0){
-                            elapsedTime.reset();
-                            robot.drive.resetPID();
-                            robot.wobbleGoal.lift();
-                            state++;
-                        }else{
-                            if(elapsedTime.time() > 0.5){
-                                robot.wobbleGoal.lift();
-                            }
-                            robot.wobbleGoal.down();
-                        }
-                        robot.wobbleGoal.clamp();
-                    }else{
-                        robot.wobbleGoal.release();
-                        robot.wobbleGoal.down();
-                        elapsedTime.reset();
-                    }
-
-                    break;
-                case 4:
-                    robot.shooter.setRotator(robot.getPos());
-
-                    points.add(new CurvePoint(new Pose2d(1.19, 18.2, Math.toRadians(0)), 1d, 1d, 25));
-                    points.add(new CurvePoint(new Pose2d(3.8, 20.5, Math.toRadians(0)), 1.0, 1d, 25));
-
-                    if(robot.getPos().getY() > 45){
-                        robot.intake.setPower(0.0);
-                        robot.shooter.flywheelMotor.setPower(0.0);
-
-                        //WOBBLE GOAL #2
-                        switch (ringCase){
-                            case 0:
-                                points.add(new CurvePoint(ZONE_1_2_POS, 1d, 1d, 25));
-                                break;
-                            case 1:
-                                points.add(new CurvePoint(ZONE_2_2_POS, 1d, robot.getPos().vec().distTo(ZONE_2_2_POS.vec()) < 15 ? 0.2 : 1d, 25));
-                                break;
-                            case 4:
-                                points.add(new CurvePoint(ZONE_4_2_POS, 1d, robot.getPos().vec().distTo(ZONE_4_2_POS.vec()) < 15 ? 0.2 : 1d, 25));
-                                break;
-                        }
-
-                    }else if(robot.getPos().getY() > 20){
-
-                        robot.shooter.flap.setPosition(robot.shooter.getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(robot.getPos().vec())));
-                        robot.shooter.setFlywheelVelocity(2000, flywheelVelo);
-                        robot.intake.setPower(1.0);
-
-                        //WOBBLE GOAL #2
-                        switch (ringCase){
-                            case 0:
-                                points.add(new CurvePoint(new Pose2d(ZONE_1_2_POS.getX(), ZONE_1_2_POS.getY(), 0), 0.15d, 1d, 25));
-                                break;
-                            case 1:
-                                points.add(new CurvePoint(new Pose2d(ZONE_2_2_POS.getX(), ZONE_2_2_POS.getY(), 0), 0.15d, 1d, 25));
-                                break;
-                            case 4:
-                                points.add(new CurvePoint(new Pose2d(ZONE_4_2_POS.getX(), ZONE_4_2_POS.getY(), 0), 0.15d, 1d, 25));
-                                break;
-                        }
-                    }else{
-                        robot.shooter.flap.setPosition(robot.shooter.getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(robot.getPos().vec())));
-                        //robot.shooter.startFlywheel();
-                        robot.shooter.setFlywheelVelocity(2000, flywheelVelo);
-                        robot.intake.setPower(1.0);
-
-                        //WOBBLE GOAL #2
-                        switch (ringCase){
-                            case 0:
-                                points.add(new CurvePoint(new Pose2d(ZONE_1_2_POS.getX(), ZONE_1_2_POS.getY(), 0), 1d, 1d, 25));
-                                break;
-                            case 1:
-                                points.add(new CurvePoint(new Pose2d(ZONE_2_2_POS.getX(), ZONE_2_2_POS.getY(), 0), 1d, 1d, 25));
-                                break;
-                            case 4:
-                                points.add(new CurvePoint(new Pose2d(ZONE_4_2_POS.getX(), ZONE_4_2_POS.getY(), 0), 1d, 1d, 25));
-                                break;
-                        }
-                    }
-
-                    if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 1.0){
-                        if(elapsedTime.time() > 1.5){
-                            elapsedTime.reset();
-                            robot.drive.resetPID();
-                            //state++;
-                        }else{
-                            if(elapsedTime.time() > 0.5){
-                                robot.wobbleGoal.release();
-                            }
-
-                            if(elapsedTime.time() > 1.0){
-                                robot.wobbleGoal.lift();
-                            }else{
-                                robot.wobbleGoal.down();
-                            }
-                        }
-                    }else{
-                        elapsedTime.reset();
-                    }
-
-                    break;
-                case 5:
                     robot.intake.barUp();
                     gtp = true;
                     points.add(new CurvePoint(new Pose2d(12.3, 109.75, Math.toRadians(325)), 0.5d, 0.5d, 25));

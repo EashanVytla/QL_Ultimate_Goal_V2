@@ -8,16 +8,16 @@ import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class WobbleGoal {
-    public final double clamp_posR = 0;
-    public final double release_posR = 0.8385;
-    public final double lift_posR = 0.61;
+    public final double clamp_posR = 0.8;
+    public final double release_posR = 0.185;
+    public final double lift_posR = 0.65;
     public final double drop_over_lift_posR = 0.49;
     public final double auto_lift_posR = 0.3;
     public final double down_posR = 0.14;
 
-    public final double clamp_posL = 0.69;
-    public final double release_posL = 0;
-    public final double lift_posL = 0.18;
+    public final double clamp_posL = 0.0;
+    public final double release_posL = 0.67;
+    public final double lift_posL = 0.14;
     public final double drop_over_lift_posL = 0.28;
     public final double auto_lift_posL = 0.52;
     public final double down_posL = 0.653;
@@ -39,11 +39,14 @@ public class WobbleGoal {
         servo_liftLeft = new Caching_Servo(map, "wobble_liftLeft");
         servo_grabLeft = new Caching_Servo(map, "wobble_grabLeft");
 
-        servo_liftRight.setPosition(lift_posR);
-        servo_liftRight.write();
         this.telemetry = telemetry;
     }
 
+    public void init(){
+        clamp();
+        lift();
+        write();
+    }
 
     public void clamp() {
         if(Robot.isBlue()){

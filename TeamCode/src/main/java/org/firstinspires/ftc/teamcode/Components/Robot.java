@@ -42,7 +42,7 @@ public class Robot {
 
     private Telemetry telemetry;
 
-    private boolean inverse = false;
+    private static boolean inverse = false;
 
     OpenCvCamera webcam;
     RingDetectionPipelineV2 detector;
@@ -55,6 +55,7 @@ public class Robot {
 
     public Robot(HardwareMap map, Telemetry telemetry){
         blue = false;
+        inverse = false;
         ULTIMATE_GOAL_POS = new Vector2d(3, 136);
         this.hardwareMap = map;
         this.telemetry = telemetry;
@@ -83,11 +84,24 @@ public class Robot {
 
     public void blue(){
         blue = true;
-        ULTIMATE_GOAL_POS = new Vector2d(-10, 136);
+        ULTIMATE_GOAL_POS = new Vector2d(-3, 136);
     }
 
     public void inverse(){
         inverse = true;
+    }
+
+    public void red(){
+        blue = false;
+        ULTIMATE_GOAL_POS = new Vector2d(3, 136);
+    }
+
+    public void notInverse(){
+        inverse = false;
+    }
+
+    public static boolean isInverse(){
+        return inverse;
     }
 
     public static boolean isBlue(){

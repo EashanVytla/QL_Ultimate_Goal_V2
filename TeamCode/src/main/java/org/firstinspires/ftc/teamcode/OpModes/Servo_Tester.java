@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -11,7 +12,7 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 @TeleOp
 public class Servo_Tester extends LinearOpMode {
     //Set the hardware mapping name of the servo
-    final String name = "wobble_liftRight";
+    final String name = "wobble_liftLeft";
 
     Servo servo;
     private double pos;
@@ -58,7 +59,7 @@ public class Servo_Tester extends LinearOpMode {
     }
 }
 
-
+@Config
 class ServoTester{
     //Set the set/start position of the servo in dashboard
     public static double pos = 0.0;
