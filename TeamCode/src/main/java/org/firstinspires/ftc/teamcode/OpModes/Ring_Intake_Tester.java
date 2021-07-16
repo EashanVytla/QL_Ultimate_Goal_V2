@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OpModes;
+    package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
@@ -18,21 +18,21 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Autonomous
 public class Ring_Intake_Tester extends OpMode {
-    Mecanum_Drive drive;
+    //Mecanum_Drive drive;
     RingLocalizer pipeline;
 
     OpenCvCamera webcam;
 
     private boolean searching = true;
     private boolean prevIsCenter = false;
-    private Robot robot;
+    //private Robot robot;
     private ElapsedTime time = new ElapsedTime();
 
     @Override
     public void init() {
-        drive = new Mecanum_Drive(hardwareMap, telemetry);
+        //drive = new Mecanum_Drive(hardwareMap, telemetry);
         pipeline = new RingLocalizer();
-        robot = new Robot(hardwareMap, telemetry);
+        //robot = new Robot(hardwareMap, telemetry);
         time = new ElapsedTime();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -46,10 +46,9 @@ public class Ring_Intake_Tester extends OpMode {
             {
                 //Tells EasyOpenCv to start streaming the webcam feed and process the information
                 //The resolution is set here
-                webcam.startStreaming(640, 280, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
             }
         });
-
     }
 
     public void start(){
@@ -60,8 +59,8 @@ public class Ring_Intake_Tester extends OpMode {
 
     @Override
     public void loop() {
-        robot.updateBulkData();
-        robot.updatePos();
+        //robot.updateBulkData();
+        //robot.updatePos();
 
         /*telemetry.addData("Min Dist", pipeline.getMinDist());
 
@@ -92,7 +91,7 @@ public class Ring_Intake_Tester extends OpMode {
 
         telemetry.update();*/
 
-        drive.write();
+        //drive.write();
         FtcDashboard.getInstance().sendImage(pipeline.getImage());
         prevIsCenter = pipeline.isCenter();
     }

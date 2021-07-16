@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OpModes;
+package org.firstinspires.ftc.teamcode.Vision;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -16,13 +16,13 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Autonomous
 public class CameraCalibrator extends OpMode {
-    CalibrationPipeline pipeline;
+    ExtrinsicsFinder pipeline;
 
     OpenCvCamera webcam;
 
     @Override
     public void init() {
-        pipeline = new CalibrationPipeline(telemetry);
+        pipeline = new ExtrinsicsFinder(telemetry);
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -39,6 +39,10 @@ public class CameraCalibrator extends OpMode {
             }
         });
 
+    }
+
+    public void start(){
+        //pipeline.startTimer();
     }
 
     @Override

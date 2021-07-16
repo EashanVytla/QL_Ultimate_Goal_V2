@@ -21,7 +21,7 @@ public class PID_Tuner extends OpMode {
     public void loop() {
         robot.updateBulkData();
 
-        robot.GoTo(new Pose2d(0, 30, 0), new Pose2d(1, 1, 1));
+        robot.GoTo(new Pose2d(0, 0, Math.PI/2), new Pose2d(1, 1, 1));
 
         telemetry.update();
     }

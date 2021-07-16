@@ -85,7 +85,7 @@ public class BlueTeleOp extends LinearOpMode {
                             }
 
                             //FIRST POWERSHOT
-                            robot.shooter.setRotator(0.48749 + 0.0255);
+                            robot.shooter.setRotator(1, robot.getPos());
                             if(time.time() > 0.5){
                                 robot.shooter.flicker.setPos(Flicker.inPos);
                             }else if(time.time() > 0.25){
@@ -99,7 +99,7 @@ public class BlueTeleOp extends LinearOpMode {
                             }
 
                             //SECOND POWERSHOT
-                            robot.shooter.setRotator(0.452 + 0.0205);
+                            robot.shooter.setRotator(2, robot.getPos());
                             if(time.time() > 1.5){
                                 robot.shooter.flicker.setPos(Flicker.inPos);
                             }else if(time.time() > 1.25){
@@ -109,7 +109,7 @@ public class BlueTeleOp extends LinearOpMode {
                             break;
                         case 2:
                             //THIRD POWERSHOT
-                            robot.shooter.setRotator(0.4165 + 0.0205);
+                            robot.shooter.setRotator(3, robot.getPos());
                             if(time.time() > 2.5){
                                 robot.shooter.flicker.setPos(Flicker.inPos);
                             }else if(time.time() > 2.25){

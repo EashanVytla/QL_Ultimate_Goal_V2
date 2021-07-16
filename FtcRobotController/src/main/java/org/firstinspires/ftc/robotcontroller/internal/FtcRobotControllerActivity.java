@@ -50,6 +50,8 @@ import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -386,7 +388,10 @@ public class FtcRobotControllerActivity extends Activity
     // check to see if there is a preferred Wi-Fi to use.
     checkPreferredChannel();
 
+    RobotLog.i("HelloQUANTUMLEAP", "HelloQUANTUMLEAP");
+
     FtcDashboard.start();
+    RobotLog.i("HelloQUANTUMLEAP2", "HelloQUANTUMLEAP2");
   }
 
   protected UpdateUI createUpdateUI() {

@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Vision;
 
+import android.graphics.Bitmap;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.opencv.android.Utils;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
@@ -15,11 +18,11 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 public class ExtrinsicsFinder extends OpenCvPipeline {
-    public static int HORIZONTAL_CORNERS = 9;
-    public static int VERTICAL_CORNERS = 7;
+    public static int HORIZONTAL_CORNERS = 8;
+    public static int VERTICAL_CORNERS = 6;
     public static double SQUARE_SIZE = 0.98425197;
-    public static CalibrationParameters CALIB_PARAMS = new CalibrationParameters(1010.7, 1010.7,
-            638.0, 340.0, 0.204058, -0.898008, 0.0, 0.0, 1.24837);
+    public static CalibrationParameters CALIB_PARAMS = new CalibrationParameters(496.222, 499.292,
+            322.836, 176.195, 0.0597197, -0.0908114, 0.0153578, -0.00202418, 0.0395567);
 
     private MatOfPoint2f imageCorners = new MatOfPoint2f();
 
@@ -29,6 +32,7 @@ public class ExtrinsicsFinder extends OpenCvPipeline {
     private Mat grayimage = new Mat();
     private Mat output = new Mat();
 
+    Bitmap image;
     private Telemetry telemetry;
 
     public ExtrinsicsFinder(Telemetry telemetry) {
@@ -86,6 +90,17 @@ public class ExtrinsicsFinder extends OpenCvPipeline {
             telemetry.update();
         }
 
+        image = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(output, image);
+
         return output;
+    }
+
+    public Bitmap getImage(){
+        if(image != null){
+            return image;
+        }
+
+        return Bitmap.createBitmap(640, 360, Bitmap.Config.ARGB_8888);
     }
 }

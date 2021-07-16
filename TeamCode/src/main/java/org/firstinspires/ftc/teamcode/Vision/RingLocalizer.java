@@ -15,7 +15,6 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
-@Config
 public class RingLocalizer extends OpenCvPipeline {
     Mat HSVMat = new Mat();
     Mat contoursOnFrameMat = new Mat();
@@ -23,12 +22,6 @@ public class RingLocalizer extends OpenCvPipeline {
     int numContoursFound = 0;
     //public Scalar lowerHSV = new Scalar(20, 90, 255);
     //public Scalar upperHSV = new Scalar(36, 230, 255);
-    public static double lowerH = 15;
-    public static double lowerS = 90;
-    public static double lowerV = 150;
-    public static double upperH = 25;
-    public static double upperS = 255;
-    public static double upperV = 255;
 
     public Scalar lowerHSV = new Scalar(15, 90, 150);
     public Scalar upperHSV = new Scalar(25, 255, 255);
@@ -114,8 +107,6 @@ public class RingLocalizer extends OpenCvPipeline {
         image = Bitmap.createBitmap(contoursOnFrameMat.cols(), contoursOnFrameMat.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(contoursOnFrameMat, image);
 
-        Log.i("BRUHH", image.getHeight() + ", " + image.getWidth());
-
         return input;
     }
 
@@ -129,7 +120,7 @@ public class RingLocalizer extends OpenCvPipeline {
             return image;
         }
 
-        return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
+        return Bitmap.createBitmap(640, 360, Bitmap.Config.ARGB_8888);
     }
 
     /*public double getMinDist(){

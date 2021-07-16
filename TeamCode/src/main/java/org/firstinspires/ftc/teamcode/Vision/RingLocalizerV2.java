@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -23,29 +24,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Config
 public class RingLocalizerV2 extends OpenCvPipeline {
     List<MatOfPoint> contoursList = new ArrayList<>(); //Array of all contours
     int numContoursFound = 0;
 
-    public static Point3 relPoint = new Point3();
+    public Point3 relPoint = new Point3(-29.875, 0, 0);
 
     //Extrinsic Calibration Parameters
-    public static Mat RVEC = new MatOfDouble(2.035399804462858, 1.041272664535304, -0.5618792670272742); // Rotation Vector Of Camera found through Calibration
-    public static Mat TVEC = new MatOfDouble(-11.36860632737538, -1.7354899166739, 31.81319062907322); // Translation Vector Of Camera from origin found through Calibration
+    public Mat RVEC; // Rotation Vector Of Camera found through Calibration
+    public Mat TVEC; // Translation Vector Of Camera from origin found through Calibration
 
     //Intrinsic Calibration Parameters
-    public static CalibrationParameters CALIB_PARAMS = new CalibrationParameters(1010.7, 1010.7,
-            638.2174071943463, 340.2355228022204, 0.2126095014133333, -1.001796829192392,
-            0.000504850246603286, -0.0001913578573509387, 1.419425306492814);
+    public CalibrationParameters CALIB_PARAMS;
+    private Pose2d ringPos = new Pose2d(0, 0, 0);
 
     public double RING_HEIGHT = 1.0;
 
-    private Mat rotation = new Mat(3, 3, CvType.CV_64FC1);
-    private Mat uvPoint = new Mat(3, 1, CvType.CV_64FC1); //Pizel point on camera view
-    private Mat lhs = new Mat();
-    private Mat rhs = new Mat();
-    private Mat pointMat = new Mat();
+    private Mat rotation;
+    private Mat uvPoint; //Pizel point on camera view
+    private Mat lhs;
+    private Mat rhs;
+    private Mat pointMat;
 
     //Simply for FTC Dashboard Purposes
     public static double lowerH = 15;
@@ -78,15 +77,30 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     private int viewmode = 0;
     private Telemetry telemetry;
 
-    private Mat HSVMat = new Mat();
-    private Mat rangeMat = new Mat();
-    private Mat denoisedMat = new Mat();
-    private Mat outputMat = new Mat();
+    private Mat HSVMat;
+    private Mat denoisedMat;
+    private Mat outputMat;
 
-    private final Mat EMPTY_MAT = new Mat();
+    private final Mat EMPTY_MAT;
+    private boolean first = true;
 
     public RingLocalizerV2(Telemetry telemetry){
         this.telemetry = telemetry;
+        denoisedMat = new Mat();
+        outputMat = new Mat();
+        EMPTY_MAT = new Mat();
+        HSVMat = new Mat();
+
+        RVEC = new MatOfDouble(1.601611450052856, 1.613751506036699, -0.8875590124183879);
+        TVEC = new MatOfDouble(0.3601768248571578, 1.989997402719623, 31.69340435872514);
+        CALIB_PARAMS = new CalibrationParameters(496.222, 499.292,
+                322.836, 176.195, 0.0597197, -0.0908114, 0.0153578, -0.00202418, 0.0395567);
+
+        rotation = new Mat(3, 3, CvType.CV_64FC1);
+        uvPoint = new Mat(3, 1, CvType.CV_64FC1);
+        lhs = new Mat();
+        rhs = new Mat();
+        pointMat = new Mat();
     }
 
     @Override
@@ -140,12 +154,13 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     }
 
     @Override
-    public Mat processFrame(Mat input) {
+    public Mat processFrame(Mat inputMat) {
         //Clearing the array list every loop cycle to prevent build up of elements
+        Log.i("INPUT MATRIX QL", String.valueOf(inputMat.empty()));
         contoursList.clear();
 
         //Converting the color space from RBG to HSV
-        Imgproc.cvtColor(input, HSVMat, Imgproc.COLOR_RGB2HSV_FULL);
+        Imgproc.cvtColor(inputMat, HSVMat, Imgproc.COLOR_RGB2HSV_FULL);
 
         //Filtering our every color but the one we want(rings)
         Core.inRange(HSVMat, lowerHSV, upperHSV, HSVMat);
@@ -162,7 +177,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         Imgproc.findContours(HSVMat, contoursList, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         numContoursFound = contoursList.size();
 
-        ArrayList<Rect> rings = new ArrayList<>();
+        inputMat.copyTo(outputMat);
 
         for (MatOfPoint contour : contoursList) {
             Moments moments = Imgproc.moments(contour);
@@ -225,15 +240,24 @@ public class RingLocalizerV2 extends OpenCvPipeline {
             pointMat.get(0, 0, buff);
             Point3 point = new Point3(buff);
             Point3 adjustedPoint = new Point3(point.x + relPoint.x, point.y + relPoint.y, point.z + relPoint.z);
+            ringPos = new Pose2d(adjustedPoint.x, adjustedPoint.y);
 
             telemetry.addData("point", point);
+            telemetry.addData("Adjusted Point", adjustedPoint);
             telemetry.update();
         }
 
-        Mat[] mats = new Mat[] { outputMat, denoisedMat, input };
-        image = Bitmap.createBitmap(mats[viewmode % mats.length].cols(), mats[viewmode % mats.length].rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mats[viewmode % mats.length], image);
-        return mats[viewmode % mats.length];
+        if(outputMat.cols() != 0 && outputMat.rows() != 0) {
+            image = Bitmap.createBitmap(outputMat.cols(), outputMat.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(outputMat, image);
+            return outputMat;
+        }else{
+            return inputMat;
+        }
+    }
+
+    public Pose2d getRingPos(Pose2d currentPos){
+        return new Pose2d(currentPos.getX() + ringPos.getY(), currentPos.getY() - ringPos.getX());
     }
 
     public Bitmap getImage(){
@@ -241,6 +265,6 @@ public class RingLocalizerV2 extends OpenCvPipeline {
             return image;
         }
 
-        return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
+        return Bitmap.createBitmap(640, 360, Bitmap.Config.ARGB_8888);
     }
 }

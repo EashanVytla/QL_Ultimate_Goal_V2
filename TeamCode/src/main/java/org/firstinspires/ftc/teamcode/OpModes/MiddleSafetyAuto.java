@@ -51,7 +51,6 @@ public class MiddleSafetyAuto extends LinearOpMode {
 
         robot.intake.barUp();
 
-        robot.shooter.setRotator(powerShotAngle1);
         robot.intake.write();
 
         //Blue Side
@@ -133,7 +132,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                         }else{
                             if(elapsedTime.time() > 2.0){
                                 //THIRD POWERSHOT
-                                robot.shooter.setRotator(powerShotAngle3);
+                                robot.shooter.setRotator(3, robot.getPos());
                                 if(elapsedTime.time() > 2.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
                                 }else if(elapsedTime.time() > 2.25){
@@ -141,7 +140,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                                 }
                             }else if(elapsedTime.time() > 1.0){
                                 //SECOND POWERSHOT
-                                robot.shooter.setRotator(powerShotAngle2);
+                                robot.shooter.setRotator(2, robot.getPos());
                                 if(elapsedTime.time() > 1.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
                                 }else if(elapsedTime.time() > 1.25){
@@ -149,7 +148,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                                 }
                             }else{
                                 //FIRST POWERSHOT
-                                robot.shooter.setRotator(powerShotAngle1);
+                                robot.shooter.setRotator(1, robot.getPos());
                                 if(elapsedTime.time() > 0.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
                                 }else if(elapsedTime.time() > 0.25){

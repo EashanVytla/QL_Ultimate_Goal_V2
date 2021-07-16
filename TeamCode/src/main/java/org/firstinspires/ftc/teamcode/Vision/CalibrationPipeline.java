@@ -27,8 +27,8 @@ import java.util.List;
 public class CalibrationPipeline extends OpenCvPipeline {
     public static double FRAME_INTERVAL = 1.0;
     public static int CALIB_FRAMES = 60;
-    public static int HORIZONTAL_CORNERS = 9;
-    public static int VERTICAL_CORNERS = 7;
+    public static int HORIZONTAL_CORNERS = 8;
+    public static int VERTICAL_CORNERS = 6;
     public static double SQUARE_SIZE = 0.98425197;
     public static boolean IS_CAPTURING = true;
     public static boolean USE_RO_METHOD = false;
@@ -52,6 +52,10 @@ public class CalibrationPipeline extends OpenCvPipeline {
 
     public CalibrationPipeline(Telemetry telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public void startTimer(){
+        timer.startTime();
     }
 
     @Override
@@ -104,6 +108,8 @@ public class CalibrationPipeline extends OpenCvPipeline {
         boolean foundCorners = Calib3d.findChessboardCorners(grayimage, boardSize, imageCorners,
                 Calib3d.CALIB_CB_ADAPTIVE_THRESH | Calib3d.CALIB_CB_FAST_CHECK | Calib3d.CALIB_CB_NORMALIZE_IMAGE);
 
+        telemetry.addData("Found Corners?", foundCorners);
+
         if (foundCorners) {
             // subpixel corner optimization
             TermCriteria criteria = new TermCriteria(TermCriteria.MAX_ITER | TermCriteria.EPS, 30, 1e-3);
@@ -127,6 +133,8 @@ public class CalibrationPipeline extends OpenCvPipeline {
                     output.width() / 500.0, new Scalar(30, 200, 30), 2);
         }
 
+        telemetry.addData("Images", imagePoints.size());
+
         image = Bitmap.createBitmap(output.cols(), output.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(output, image);
         return output;
@@ -137,6 +145,6 @@ public class CalibrationPipeline extends OpenCvPipeline {
             return image;
         }
 
-        return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
+        return Bitmap.createBitmap(640, 360, Bitmap.Config.ARGB_8888);
     }
 }

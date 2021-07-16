@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Math.Vector2;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipelineV2;
@@ -49,6 +50,9 @@ public class Robot {
     Pose2d startPos = new Pose2d(0, 0, 0);
     public static Vector2d ULTIMATE_GOAL_POS;
     private static boolean blue = false;
+    public static Vector2d POWER_SHOT_R;
+    public static Vector2d POWER_SHOT_M;
+    public static Vector2d POWER_SHOT_L;
 
     TelemetryPacket packet;
     FtcDashboard dashboard;
@@ -57,6 +61,9 @@ public class Robot {
         blue = false;
         inverse = false;
         ULTIMATE_GOAL_POS = new Vector2d(3, 136);
+        POWER_SHOT_R = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 17.20 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_M = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 25 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
         this.hardwareMap = map;
         this.telemetry = telemetry;
 
@@ -186,8 +193,8 @@ public class Robot {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        detector = new RingDetectionPipelineV2();
-        webcam.setPipeline(detector);
+        /*detector = new RingDetectionPipelineV2();
+        webcam.setPipeline(detector);*/
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
