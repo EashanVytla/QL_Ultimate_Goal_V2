@@ -40,8 +40,8 @@ public class S4T_Localizer {
 
     public static double heading = 0;
     Telemetry telemetry;
-    public double k_strafe = 1.0;
-    public double k_vert = 1.0;
+    public static double k_strafe = 1.0;
+    public static double k_vert = 1.0;
     public double TICKS_TO_INCHES_VERT = 201.67339734597755609;
     public double TICKS_TO_INCHES_STRAFE = 335.381388888888888;
 

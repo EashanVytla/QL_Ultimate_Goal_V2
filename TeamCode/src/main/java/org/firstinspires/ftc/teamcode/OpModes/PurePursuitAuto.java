@@ -70,7 +70,6 @@ public class PurePursuitAuto extends LinearOpMode {
 
             if(gamepad1.a){
                 robot.blue();
-                robot.inverse();
                 robot.wobbleGoal.init();
             }
 
@@ -117,9 +116,7 @@ public class PurePursuitAuto extends LinearOpMode {
                 case 1:
                     points.add(new CurvePoint(new Pose2d(0, 0, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(new Pose2d(-16d, 27d, Math.toRadians(0)), 1d, 1d, 25));
-                    points.add(new CurvePoint(POWER_SHOT_POS, 1.0d, 1.0d, 25));
-
-                    robot.shooter.setFlap(0.033 + Shooter.FLAP_MIN);
+                    points.add(new CurvePoint(POWER_SHOT_POS, 0.75d, 1.0d, 25));
 
                     if(powershotBool){
                         robot.wobbleGoal.servo_liftRight.setPosition(0);
@@ -133,6 +130,7 @@ public class PurePursuitAuto extends LinearOpMode {
                         }else{
                             if(elapsedTime.time() > 2.0){
                                 //THIRD POWERSHOT
+                                robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_L.distTo(robot.getPos().vec())));
                                 robot.shooter.setRotator(3, robot.getPos());
                                 if(elapsedTime.time() > 2.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
@@ -141,6 +139,7 @@ public class PurePursuitAuto extends LinearOpMode {
                                 }
                             }else if(elapsedTime.time() > 1.0){
                                 //SECOND POWERSHOT
+                                robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_M.distTo(robot.getPos().vec())));
                                 robot.shooter.setRotator(2, robot.getPos());
                                 if(elapsedTime.time() > 1.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
@@ -149,6 +148,7 @@ public class PurePursuitAuto extends LinearOpMode {
                                 }
                             }else{
                                 //FIRST POWERSHOT
+                                robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
                                 robot.shooter.setRotator(1, robot.getPos());
                                 if(elapsedTime.time() > 0.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
@@ -293,7 +293,7 @@ public class PurePursuitAuto extends LinearOpMode {
                         if(elapsedTime.time() > 1.5){
                             elapsedTime.reset();
                             robot.drive.resetPID();
-                            //state++;
+                            state++;
                         }else{
                             if(elapsedTime.time() > 0.5){
                                 robot.wobbleGoal.release();

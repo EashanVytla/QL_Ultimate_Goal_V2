@@ -36,7 +36,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
     //Intrinsic Calibration Parameters
     public CalibrationParameters CALIB_PARAMS;
-    private Pose2d ringPos = new Pose2d(0, 0, 0);
+    private ArrayList<Pose2d> ringPositions = new ArrayList<>();
 
     public double RING_HEIGHT = 1.0;
 
@@ -66,7 +66,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
     //Blur and Dilation Constants for ring detection
     public static double blurConstant = 5;
-    public static double dilationConstant = 2;
+    public static double dilationConstant = 7.5;
 
     private MatOfPoint2f contour2f = new MatOfPoint2f();
     private MatOfInt hullIndices = new MatOfInt();
@@ -155,9 +155,9 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
     @Override
     public Mat processFrame(Mat inputMat) {
-        //Clearing the array list every loop cycle to prevent build up of elements
-        Log.i("INPUT MATRIX QL", String.valueOf(inputMat.empty()));
         contoursList.clear();
+
+        //Clearing the array list every loop cycle to prevent build up of elements
 
         //Converting the color space from RBG to HSV
         Imgproc.cvtColor(inputMat, HSVMat, Imgproc.COLOR_RGB2HSV_FULL);
@@ -178,6 +178,12 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         numContoursFound = contoursList.size();
 
         inputMat.copyTo(outputMat);
+
+        if(contoursList.size() != 0){
+            ringPositions.clear();
+        }else{
+            telemetry.addLine("HELLO WorLD");
+        }
 
         for (MatOfPoint contour : contoursList) {
             Moments moments = Imgproc.moments(contour);
@@ -240,11 +246,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
             pointMat.get(0, 0, buff);
             Point3 point = new Point3(buff);
             Point3 adjustedPoint = new Point3(point.x + relPoint.x, point.y + relPoint.y, point.z + relPoint.z);
-            ringPos = new Pose2d(adjustedPoint.x, adjustedPoint.y);
-
-            telemetry.addData("point", point);
-            telemetry.addData("Adjusted Point", adjustedPoint);
-            telemetry.update();
+            ringPositions.add(new Pose2d(adjustedPoint.x, adjustedPoint.y));
         }
 
         if(outputMat.cols() != 0 && outputMat.rows() != 0) {
@@ -256,8 +258,13 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         }
     }
 
-    public Pose2d getRingPos(Pose2d currentPos){
-        return new Pose2d(currentPos.getX() + ringPos.getY(), currentPos.getY() - ringPos.getX());
+    public ArrayList<Pose2d> getRingPositions(Pose2d currentPos){
+        ArrayList<Pose2d> positions = new ArrayList<>();
+        for(int i = 0; i < ringPositions.size(); i++){
+            positions.add(i, new Pose2d(currentPos.getX() + ringPositions.get(i).getY(), currentPos.getY() - ringPositions.get(i).getX()));
+        }
+
+        return positions;
     }
 
     public Bitmap getImage(){

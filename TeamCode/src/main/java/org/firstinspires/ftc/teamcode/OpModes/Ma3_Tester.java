@@ -14,7 +14,7 @@ public class Ma3_Tester extends OpMode {
     double MAX_VOLTAGE = 3.263;
 
     public void init(){
-        encoder = hardwareMap.get(AnalogInput.class, "MA3");
+        encoder = hardwareMap.get(AnalogInput.class, "rotatorEncoder");
     }
 
     public void loop(){

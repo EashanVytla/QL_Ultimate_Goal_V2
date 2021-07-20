@@ -11,24 +11,18 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.Components.Shooter;
 import org.firstinspires.ftc.teamcode.MPC.geometry.Pose2d;
-import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @Autonomous
 public class RotatorPIDTuner extends OpMode {
     Robot robot;
     FtcDashboard dashbaord;
     TelemetryPacket packet;
-    GamepadEx gamepadEx;
-    GamepadEx gamepad2Ex;
-    int powerShotToggle = 1;
 
     @Override
     public void init() {
         dashbaord = FtcDashboard.getInstance();
         robot = new Robot(hardwareMap, telemetry);
         packet = new TelemetryPacket();
-        gamepadEx = new GamepadEx(gamepad1);
-        gamepad2Ex = new GamepadEx(gamepad2);
     }
 
     @Override
@@ -36,23 +30,14 @@ public class RotatorPIDTuner extends OpMode {
         robot.updateBulkData();
         robot.updatePos();
 
-        if(gamepadEx.isPress(GamepadEx.Control.a)){
-            powerShotToggle++;
-            powerShotToggle %= 4;
-        }
+        robot.shooter.setRotator(1, robot.getPos());
 
-        robot.shooter.setRotator(powerShotToggle, robot.getPos());
-
-        telemetry.addData("Powershot Toggle", powerShotToggle);
         telemetry.addData("Shooter Angle Radians", robot.shooter.getRotatorPos());
         telemetry.addData("Shooter Angle", Math.toDegrees(robot.shooter.getRotatorPos()));
         telemetry.addData("Current Position", robot.getPos());
 
-        gamepadEx.loop();
-        robot.shooter.operate(gamepadEx, gamepad2Ex, robot.getPos(), robot.getData2(), robot.getData(), packet);
-        robot.drive.driveCentric(gamepad1, 1.0, 1.0, robot.getPos().getHeading());
-        robot.shooter.write();
-        robot.drive.write();
         dashbaord.sendTelemetryPacket(packet);
+
+        robot.shooter.write();
     }
 }

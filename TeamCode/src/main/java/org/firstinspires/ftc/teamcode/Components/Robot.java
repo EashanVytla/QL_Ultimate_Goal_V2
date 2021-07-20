@@ -43,8 +43,6 @@ public class Robot {
 
     private Telemetry telemetry;
 
-    private static boolean inverse = false;
-
     OpenCvCamera webcam;
     RingDetectionPipelineV2 detector;
     Pose2d startPos = new Pose2d(0, 0, 0);
@@ -59,11 +57,10 @@ public class Robot {
 
     public Robot(HardwareMap map, Telemetry telemetry){
         blue = false;
-        inverse = false;
-        ULTIMATE_GOAL_POS = new Vector2d(3, 136);
+        ULTIMATE_GOAL_POS = new Vector2d(5, 136);
         POWER_SHOT_R = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 17.20 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
         POWER_SHOT_M = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 25 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
         this.hardwareMap = map;
         this.telemetry = telemetry;
 
@@ -91,24 +88,11 @@ public class Robot {
 
     public void blue(){
         blue = true;
-        ULTIMATE_GOAL_POS = new Vector2d(-3, 136);
-    }
-
-    public void inverse(){
-        inverse = true;
     }
 
     public void red(){
         blue = false;
         ULTIMATE_GOAL_POS = new Vector2d(3, 136);
-    }
-
-    public void notInverse(){
-        inverse = false;
-    }
-
-    public static boolean isInverse(){
-        return inverse;
     }
 
     public static boolean isBlue(){
@@ -264,7 +248,7 @@ public class Robot {
     }
 
     public Pose2d getPos(){
-        if(inverse){
+        if(blue){
             return new Pose2d(-localizer.getPose().getX() - startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());
         }else{
             return new Pose2d(localizer.getPose().getX() + startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());

@@ -11,9 +11,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
+@Config
 public class Flicker {
     public static double outPos = 0.21;
-    public static double inPos = 0.345;
+    public static double inPos = 0.31;
     public static double flickerSpeed = 0.1;
 
     Telemetry telemetry;

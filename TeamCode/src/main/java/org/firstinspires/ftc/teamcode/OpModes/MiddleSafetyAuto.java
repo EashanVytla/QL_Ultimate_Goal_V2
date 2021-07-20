@@ -24,17 +24,19 @@ public class MiddleSafetyAuto extends LinearOpMode {
     Robot robot;
     private boolean powershotBool = false;
 
-    private Pose2d POWER_SHOT_POS = new Pose2d(-18.5d, 56.5d, Math.toRadians(0));
+    private Pose2d POWER_SHOT_POS = new Pose2d(-20d, 52d, Math.toRadians(0));
     private Pose2d ZONE_1_POS = new Pose2d(17, 79, Math.toRadians(0));
     private Pose2d ZONE_2_POS = new Pose2d(-4.5, 103.5, Math.toRadians(0));
     private Pose2d ZONE_4_POS = new Pose2d(19, 109.5, Math.toRadians(325));
 
-    //private Pose2d ZONE_1_2_POS = new Pose2d(11, 72, Math.toRadians(0));
-    //private Pose2d ZONE_2_2_POS = new Pose2d(-8.5, 95.5, Math.toRadians(0));
-    //private Pose2d ZONE_4_2_POS = new Pose2d(11, 119.5, Math.toRadians(325));
+    private Pose2d ZONE_1_2_POS = new Pose2d(11, 72, Math.toRadians(0));
+    private Pose2d ZONE_2_2_POS = new Pose2d(-8.5, 95.5, Math.toRadians(0));
+    private Pose2d ZONE_4_2_POS = new Pose2d(11, 119.5, Math.toRadians(325));
 
-    //private Pose2d WOBBLE_POS_2 = new Pose2d(0.5, 18.2, Math.toRadians(0));
+    private Pose2d WOBBLE_POS_2 = new Pose2d(0.5, 18.2, Math.toRadians(0));
     private Pose2d PARK = new Pose2d(-6.6, 75.3, Math.toRadians(0));
+
+    //0.863
 
     private int ringCase = 0;
 
@@ -46,7 +48,6 @@ public class MiddleSafetyAuto extends LinearOpMode {
     public void runOpMode() {
         elapsedTime = new ElapsedTime();
         robot = new Robot(hardwareMap, telemetry);
-        robot.setStartPose(new Pose2d(15,0,0));
         robot.localizer.reset();
 
         robot.intake.barUp();
@@ -69,7 +70,6 @@ public class MiddleSafetyAuto extends LinearOpMode {
 
             if(gamepad1.a){
                 robot.blue();
-                robot.inverse();
                 robot.wobbleGoal.init();
             }
 
@@ -116,9 +116,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                 case 1:
                     points.add(new CurvePoint(new Pose2d(0, 0, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(new Pose2d(-16d, 27d, Math.toRadians(0)), 1d, 1d, 25));
-                    points.add(new CurvePoint(POWER_SHOT_POS, 1.0d, 1.0d, 25));
-
-                    robot.shooter.setFlap(0.033 + Shooter.FLAP_MIN);
+                    points.add(new CurvePoint(POWER_SHOT_POS, 0.75d, 1.0d, 25));
 
                     if(powershotBool){
                         robot.wobbleGoal.servo_liftRight.setPosition(0);
@@ -132,6 +130,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                         }else{
                             if(elapsedTime.time() > 2.0){
                                 //THIRD POWERSHOT
+                                robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_L.distTo(robot.getPos().vec())));
                                 robot.shooter.setRotator(3, robot.getPos());
                                 if(elapsedTime.time() > 2.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
@@ -140,6 +139,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                                 }
                             }else if(elapsedTime.time() > 1.0){
                                 //SECOND POWERSHOT
+                                robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_M.distTo(robot.getPos().vec())));
                                 robot.shooter.setRotator(2, robot.getPos());
                                 if(elapsedTime.time() > 1.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
@@ -148,6 +148,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                                 }
                             }else{
                                 //FIRST POWERSHOT
+                                robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
                                 robot.shooter.setRotator(1, robot.getPos());
                                 if(elapsedTime.time() > 0.5){
                                     robot.shooter.flicker.setPos(Flicker.inPos);
@@ -161,12 +162,15 @@ public class MiddleSafetyAuto extends LinearOpMode {
                             powershotBool = true;
                         }
                         elapsedTime.reset();
+                        robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
+                        robot.shooter.setRotator(1, robot.getPos());
                     }
 
                     robot.shooter.setFlywheelVelocity(1750, flywheelVelo);
 
                     break;
                 case 2:
+                    robot.shooter.setFlywheelPower(0.0);
                     points.add(new CurvePoint(new Pose2d(-21d, 56d, Math.toRadians(0)), 1d, 1d, 25));
                     switch (ringCase){
                         case 0:

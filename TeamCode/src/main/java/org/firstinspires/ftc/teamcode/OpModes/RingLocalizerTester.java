@@ -17,6 +17,9 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 @Autonomous
 public class RingLocalizerTester extends OpMode {
     RingLocalizerV2 pipeline;
@@ -24,7 +27,8 @@ public class RingLocalizerTester extends OpMode {
     GamepadEx gamepadEx;
 
     OpenCvCamera webcam;
-    Pose2d target = new Pose2d(0, 0, 0);
+    ArrayList<Pose2d> targets = new ArrayList<>();
+    ArrayList<Pose2d> prevTarget = new ArrayList<>();
     boolean toggle = false;
 
     @Override
@@ -60,13 +64,34 @@ public class RingLocalizerTester extends OpMode {
 
         if(toggle){
             robot.intake.setPower(1.0);
-            robot.GoTo(target, new Pose2d(1.0, 1.0, 1.0));
+            //robot.GoTo(target, new Pose2d(1.0, 1.0, 1.0));
         }else{
-            target = pipeline.getRingPos(robot.getPos());
+            try{
+                targets = pipeline.getRingPositions(robot.getPos());
+            }catch(Exception e){
+                telemetry.addLine("No rings found...");
+            }
+
+            /*if(targets.size() == 0){
+                targets = prevTarget;
+            }*/
+
             robot.intake.setPower(0.0);
         }
 
-        robot.intake.write();
+        telemetry.addData("targets", toggle);
+
+        for (int i = 0; i < targets.size(); i++){
+            telemetry.addData("Ring Position: " + i, targets.get(i));
+        }
+
+        if(targets.size() == 0){
+            telemetry.addLine("SIZE IS 0");
+        }
+
+        prevTarget = targets;
+
+        //robot.intake.write();
         gamepadEx.loop();
     }
 }
