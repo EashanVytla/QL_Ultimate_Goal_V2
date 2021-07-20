@@ -39,7 +39,6 @@ public class LinearTeleOp extends LinearOpMode {
 
         waitForStart();
 
-        robot.start();
         time.startTime();
 
         while(opModeIsActive()){

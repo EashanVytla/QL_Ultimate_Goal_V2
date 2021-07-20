@@ -104,10 +104,6 @@ public class Shooter {
         flywheelMotor.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
-    public void start(){
-        flicker.start();
-    }
-
     // Writing to all the motors and servos
     public void write(){
         flicker.write();

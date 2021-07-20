@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Components;
 
+import android.os.SystemClock;
 import android.os.health.ServiceHealthStats;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -15,19 +16,17 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 public class Flicker {
     public static double outPos = 0.21;
     public static double inPos = 0.31;
-    public static double flickerSpeed = 0.1;
+    public static double flickerSpeed = 100;
 
     Telemetry telemetry;
     Caching_Servo flicker;
     protected boolean flick = false;
     private int flickState = 0;
-    private ElapsedTime time;
+    private long prevTime = 0;
 
     protected Flicker(HardwareMap hardwareMap, Telemetry telemetry){
         flicker = new Caching_Servo(hardwareMap, "flicker");
         this.telemetry = telemetry;
-        time = new ElapsedTime();
-        time.reset();
 
         flicker.setPosition(inPos);
     }
@@ -36,19 +35,14 @@ public class Flicker {
         flicker.setPosition(pos);
     }
 
-    public void start(){
-        time.startTime();
-    }
-
     public void reset(){
-        time.reset();
         flickState = 0;
     }
 
     public void flickStack(){
         if(flickState % 2 == 0){
-            if(time.time() > flickerSpeed){
-                time.reset();
+            if(getTime() > flickerSpeed){
+                prevTime = getTime();
                 flickState++;
             }
 
@@ -57,23 +51,27 @@ public class Flicker {
             flicker.setPosition(inPos);
 
             if(flickState == 5){
-                if(time.time() > flickerSpeed + 1.0){
+                if(getTime() > flickerSpeed + 1.0){
                     flickState = 0;
                     flick = false;
                 }
             }else{
-                if(time.time() > flickerSpeed){
-                    time.reset();
+                if(getTime() > flickerSpeed){
+                    prevTime = getTime();
                     flickState++;
                 }
             }
         }
     }
 
+    private long getTime(){
+        return SystemClock.uptimeMillis() - prevTime;
+    }
+
     public void flick(){
         if(flickState % 2 == 0){
-            if(time.time() > flickerSpeed){
-                time.reset();
+            if(getTime() > flickerSpeed){
+                prevTime = getTime();
                 flickState++;
             }
 
@@ -81,8 +79,8 @@ public class Flicker {
         }else if(flickState % 2 == 1){
             flicker.setPosition(inPos);
 
-            if(time.time() > flickerSpeed){
-                time.reset();
+            if(getTime() > flickerSpeed){
+                prevTime = getTime();
                 flickState++;
             }
         }

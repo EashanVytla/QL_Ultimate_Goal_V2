@@ -107,10 +107,6 @@ public class Robot {
         return heading;
     }
 
-    public void start(){
-        shooter.start();
-    }
-
     public void resetShooterPID(){
         shooter.resetPID();
     }
