@@ -41,7 +41,6 @@ public class BlueTeleOp extends LinearOpMode {
 
         waitForStart();
 
-        robot.start();
         time.startTime();
 
         while(opModeIsActive()){
