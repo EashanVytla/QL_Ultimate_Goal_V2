@@ -47,6 +47,7 @@ public class Robot {
     RingDetectionPipelineV2 detector;
     Pose2d startPos = new Pose2d(0, 0, 0);
     public static Vector2d ULTIMATE_GOAL_POS;
+    public static Vector2d ULTIMATE_GOAL2_POS;
     private static boolean blue = false;
     public static Vector2d POWER_SHOT_R;
     public static Vector2d POWER_SHOT_M;
@@ -58,6 +59,7 @@ public class Robot {
     public Robot(HardwareMap map, Telemetry telemetry){
         blue = false;
         ULTIMATE_GOAL_POS = new Vector2d(5, 136);
+        ULTIMATE_GOAL2_POS = new Vector2d(-69,136);
         POWER_SHOT_R = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 17.20 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
         POWER_SHOT_M = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 25 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
         POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
@@ -127,6 +129,7 @@ public class Robot {
 
         telemetry.addData("Robot Position:", getPos());
         telemetry.addData("Ultimate Goal Position", ULTIMATE_GOAL_POS);
+        telemetry.addData("Ultimate Goal 2 Position", ULTIMATE_GOAL2_POS);
 
         dashboard.sendTelemetryPacket(packet);
         drive.write();

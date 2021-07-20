@@ -166,6 +166,23 @@ public class Shooter {
         return Range.clip(a, FLAP_MIN, FLAP_MAX);
     }
 
+    public double getFlapPosMiddle(double distance){
+        double newDist = Range.clip(distance, 84, 103);
+        double a = 9.9683e-9 * Math.pow(newDist, 6);
+        a += -0.00000374408 * Math.pow(newDist, 5);
+        a += 0.000531852 * Math.pow(newDist, 4);
+        a += -0.0340679 * Math.pow(newDist, 3);
+        a += 0.844729 * Math.pow(newDist, 2);
+
+        a /= 100;
+
+        a -= 0.03;
+
+        telemetry.addData("Middle Goal Regressions Position", a);
+
+        return Range.clip(a, FLAP_MIN, FLAP_MAX);
+    }
+
     public void resetPID(){
         flywheelPIDController.reset();
     }
