@@ -30,6 +30,8 @@ public class BlueTeleOp extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry);
         shooter = new Shooter(hardwareMap, telemetry);
 
+        robot.setStartPose(new Pose2d(13.5,0,0));
+
         robot.blue();
 
         robot.localizer.k_strafe = kStrafe;

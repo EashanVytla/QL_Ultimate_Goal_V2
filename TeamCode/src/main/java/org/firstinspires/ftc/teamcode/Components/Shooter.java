@@ -410,17 +410,17 @@ public class Shooter {
             flywheelMotor.setPower(0.0);
         }
 
-        if (gamepad1Ex.isPress(GamepadEx.Control.)) { //TBD
+        if (gamepad1Ex.isPress(GamepadEx.Control.b)) { //TBD
             flapToggle = !flapToggle;
         }
 
-        if (gamepad1Ex.isPress(GamepadEx.Control.)) { //TBD
+        if (gamepad1Ex.isPress(GamepadEx.Control.y)) { //TBD
             midGoalToggle = !midGoalToggle;
         }
 
         if (powerShotToggle == 0) {
             if (flapToggle) {
-                setFlap(); //TBD
+                setFlap(0.9);
             } else {
                 if (midGoalToggle) {
                     setFlap(getFlapPosMiddle(Robot.ULTIMATE_GOAL2_POS.distTo(currentPos.vec())));

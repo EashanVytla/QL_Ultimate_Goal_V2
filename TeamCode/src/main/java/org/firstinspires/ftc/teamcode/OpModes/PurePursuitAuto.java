@@ -50,6 +50,8 @@ public class PurePursuitAuto extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry);
         robot.localizer.reset();
 
+        robot.setStartPose(new Pose2d(-13.5, 0,0));
+
         robot.intake.barUp();
 
         robot.intake.write();
