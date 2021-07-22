@@ -108,21 +108,19 @@ public class Shooter {
     public void write(){
         flicker.write();
         flywheelMotor.write();
-        rotator.write();
+        //rotator.write();
         flap.write();
         stopper.write();
     }
 
     public double getFlapPos(double distance){
-        double newDist = Range.clip(distance, 75, 120);
+        double newDist = Range.clip(distance, 75, 105);
 
-        double a = 9.9683e-9 * Math.pow(newDist, 6);
-        a += -0.00000374408 * Math.pow(newDist, 5);
-        a += 0.000531852 * Math.pow(newDist, 4);
-        a += -0.0340679 * Math.pow(newDist, 3);
-        a += 0.844729 * Math.pow(newDist, 2);
-
-        a /= 100;
+        double a = -4.7272727272622e-8 * Math.pow(newDist, 4);
+        a += 1.8529292929256e-5 * Math.pow(newDist, 3);
+        a += -0.0026813333333283 * Math.pow(newDist, 2);
+        a += 0.16957315295787 * newDist;
+        a += -3.054402380946;
 
         /*double[] arr = new double[] {0, 1.14185, -0.223794, -0.0523778,
                 0.0147242, -0.000758333};
@@ -133,20 +131,16 @@ public class Shooter {
             a += arr[i] * Math.pow(newDist, i + 1);
         }*/
 
-        return Range.clip(a - 0.017, FLAP_MIN, FLAP_MAX);
+        return Range.clip(a, FLAP_MIN, FLAP_MAX);
     }
 
     public double getFlapPosPowerShot(double distance){
-        double newDist = Range.clip(distance, 84, 103);
-        double a = 9.9683e-9 * Math.pow(newDist, 6);
-        a += -0.00000374408 * Math.pow(newDist, 5);
-        a += 0.000531852 * Math.pow(newDist, 4);
-        a += -0.0340679 * Math.pow(newDist, 3);
-        a += 0.844729 * Math.pow(newDist, 2);
-
-        a /= 100;
-
-        a -= 0.03;
+        double newDist = Range.clip(distance, 75, 105);
+        double a = 9.8181818181719e-8 * Math.pow(newDist, 4);
+        a += -3.4723232323197e-5 * Math.pow(newDist, 3);
+        a += 0.0045869999999952 * Math.pow(newDist, 2);
+        a += -0.26865109668081 * newDist;
+        a += 6.7524999999936;
 
         /*double[] arr = new double[] {-3.98641555e-15,  6.16910146e-07,  3.83054854e-05, -8.13602663e-07,
                 4.57405101e-09};
@@ -156,8 +150,6 @@ public class Shooter {
         for(int i = 0; i < arr.length; i++){
             a += arr[i] * Math.pow(newDist, i + 1);
         }*/
-
-        telemetry.addData("Power Shot Regressions Position", a);
 
         return Range.clip(a, FLAP_MIN, FLAP_MAX);
     }
@@ -365,15 +357,19 @@ public class Shooter {
 
         if(powerShotToggle == 0){
             setFlap(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())));
+            telemetry.addData("Flap Regression Pos", getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())));
             telemetry.addData("Dist to Ultimate Goal", currentPos.vec().distTo(Robot.ULTIMATE_GOAL_POS));
         }else if(powerShotToggle == 1){
             setFlap(getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(currentPos.vec())));
+            telemetry.addData("Flap Regression Pos", getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(currentPos.vec())));
             telemetry.addData("Dist to Right Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_R));
         }else if(powerShotToggle == 2){
             setFlap(getFlapPosPowerShot(Robot.POWER_SHOT_M.distTo(currentPos.vec())));
+            telemetry.addData("Flap Regression Pos", getFlapPosPowerShot(Robot.POWER_SHOT_M.distTo(currentPos.vec())));
             telemetry.addData("Dist to Middle Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_M));
         }else if(powerShotToggle == 3){
             setFlap(getFlapPosPowerShot(Robot.POWER_SHOT_L.distTo(currentPos.vec())));
+            telemetry.addData("Flap Regression Pos", getFlapPosPowerShot(Robot.POWER_SHOT_L.distTo(currentPos.vec())));
             telemetry.addData("Dist to Left Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_L));
         }
 
@@ -396,6 +392,7 @@ public class Shooter {
         setFlap(flapTesterPos);*/
         //----------------------------------------------------------
         telemetry.addData("Powershot Toggle", powerShotToggle);
+        telemetry.addData("Dist to Right Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_R));
         telemetry.addData("Flap Position", flapTesterPos);
     }
 }

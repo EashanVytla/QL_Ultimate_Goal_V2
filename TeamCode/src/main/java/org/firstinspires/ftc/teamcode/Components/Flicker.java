@@ -14,9 +14,9 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @Config
 public class Flicker {
-    public static double outPos = 0.21;
-    public static double inPos = 0.31;
-    public static double flickerSpeed = 100;
+    public static double outPos = 0.23;
+    public static double inPos = 0.30;
+    public static double flickerSpeed = 70;
 
     Telemetry telemetry;
     Caching_Servo flicker;
@@ -42,7 +42,7 @@ public class Flicker {
     public void flickStack(){
         if(flickState % 2 == 0){
             if(getTime() > flickerSpeed){
-                prevTime = getTime();
+                resetTime();
                 flickState++;
             }
 
@@ -57,7 +57,7 @@ public class Flicker {
                 }
             }else{
                 if(getTime() > flickerSpeed){
-                    prevTime = getTime();
+                    resetTime();
                     flickState++;
                 }
             }
@@ -68,10 +68,14 @@ public class Flicker {
         return SystemClock.uptimeMillis() - prevTime;
     }
 
+    private void resetTime(){
+        prevTime = SystemClock.uptimeMillis();
+    }
+
     public void flick(){
         if(flickState % 2 == 0){
             if(getTime() > flickerSpeed){
-                prevTime = getTime();
+                resetTime();
                 flickState++;
             }
 
@@ -80,7 +84,7 @@ public class Flicker {
             flicker.setPosition(inPos);
 
             if(getTime() > flickerSpeed){
-                prevTime = getTime();
+                resetTime();
                 flickState++;
             }
         }

@@ -38,6 +38,10 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     public CalibrationParameters CALIB_PARAMS;
     private ArrayList<Pose2d> ringPositions = new ArrayList<>();
 
+    public static int DENOISING_ITERS = 3;
+
+    private Mat STRUCT_ELEMENT;
+
     public double RING_HEIGHT = 1.0;
 
     private Mat rotation;
@@ -46,14 +50,6 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     private Mat rhs;
     private Mat pointMat;
 
-    //Simply for FTC Dashboard Purposes
-    public static double lowerH = 15;
-    public static double lowerS = 90;
-    public static double lowerV = 150;
-    public static double upperH = 25;
-    public static double upperS = 255;
-    public static double upperV = 255;
-
     //Parameters to define the object as a ring
     public static double MIN_AREA = 100;
     public static double MIN_CIRCULARITY = 0.5;
@@ -61,12 +57,8 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     public static double MIN_CONVEXITY = 0.9;
 
     //HSV Range
-    private Scalar lowerHSV = new Scalar(lowerH, lowerS, lowerV);
-    private Scalar upperHSV = new Scalar(upperH, upperS, upperV);
-
-    //Blur and Dilation Constants for ring detection
-    public static double blurConstant = 5;
-    public static double dilationConstant = 7.5;
+    private Scalar lowerHSV = new Scalar(VisionConstants.lowerH, VisionConstants.lowerS, VisionConstants.lowerV);
+    private Scalar upperHSV = new Scalar(VisionConstants.upperH, VisionConstants.upperS, VisionConstants.upperV);
 
     private MatOfPoint2f contour2f = new MatOfPoint2f();
     private MatOfInt hullIndices = new MatOfInt();
@@ -83,6 +75,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
     private final Mat EMPTY_MAT;
     private boolean first = true;
+    private Mat hierarchy = new Mat();
 
     public RingLocalizerV2(Telemetry telemetry){
         this.telemetry = telemetry;
@@ -157,8 +150,6 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     public Mat processFrame(Mat inputMat) {
         contoursList.clear();
 
-        //Clearing the array list every loop cycle to prevent build up of elements
-
         //Converting the color space from RBG to HSV
         Imgproc.cvtColor(inputMat, HSVMat, Imgproc.COLOR_RGB2HSV_FULL);
 
@@ -166,16 +157,17 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         Core.inRange(HSVMat, lowerHSV, upperHSV, HSVMat);
 
         //Creating a Gaussian Blur on the image to reduce noise
-        Imgproc.GaussianBlur(HSVMat, HSVMat, new Size(blurConstant, blurConstant), 0);
+        Imgproc.GaussianBlur(HSVMat, HSVMat, new Size(VisionConstants.blurConstant, VisionConstants.blurConstant), 0);
 
         //Creating the kernal of 15, 15 structuring element
-        Mat kernal = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2 * dilationConstant + 1, 2 * dilationConstant + 1));
+        Mat kernal = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2 * VisionConstants.dilationConstant + 1, 2 * VisionConstants.dilationConstant + 1));
         //Dilating the image parameters are source, destination, and kernal
         Imgproc.dilate(HSVMat, HSVMat, kernal);
 
         //Fingding the contours based on the HSV ranges
-        Imgproc.findContours(HSVMat, contoursList, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(HSVMat, contoursList, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
         numContoursFound = contoursList.size();
+
 
         inputMat.copyTo(outputMat);
 
