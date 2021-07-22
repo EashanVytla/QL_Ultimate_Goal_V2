@@ -410,11 +410,11 @@ public class Shooter {
             flywheelMotor.setPower(0.0);
         }
 
-        if (gamepad1Ex.isPress(GamepadEx.Control.b)) { //TBD
+        if (gamepad1Ex.isPress(GamepadEx.Control.b)) { 
             flapToggle = !flapToggle;
         }
 
-        if (gamepad1Ex.isPress(GamepadEx.Control.y)) { //TBD
+        if (gamepad1Ex.isPress(GamepadEx.Control.y)) {
             midGoalToggle = !midGoalToggle;
         }
 
