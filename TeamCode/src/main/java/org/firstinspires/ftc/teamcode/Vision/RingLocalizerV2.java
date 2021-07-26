@@ -19,6 +19,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,11 +37,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
     //Intrinsic Calibration Parameters
     public CalibrationParameters CALIB_PARAMS;
-    private ArrayList<Pose2d> ringPositions = new ArrayList<>();
-
-    public static int DENOISING_ITERS = 3;
-
-    private Mat STRUCT_ELEMENT;
+    private ArrayList<Vector2d> ringPositions = new ArrayList<>();
 
     public double RING_HEIGHT = 1.0;
 
@@ -49,12 +46,6 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     private Mat lhs;
     private Mat rhs;
     private Mat pointMat;
-
-    //Parameters to define the object as a ring
-    public static double MIN_AREA = 100;
-    public static double MIN_CIRCULARITY = 0.5;
-    public static double MIN_INERTIA_RATIO = 0.06;
-    public static double MIN_CONVEXITY = 0.9;
 
     //HSV Range
     private Scalar lowerHSV = new Scalar(VisionConstants.lowerH, VisionConstants.lowerS, VisionConstants.lowerV);
@@ -65,21 +56,12 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     private MatOfPoint convexHull = new MatOfPoint();
     private MatOfPoint2f undistortedPoints = new MatOfPoint2f();
 
-    private Bitmap image;
-    private int viewmode = 0;
-    private Telemetry telemetry;
-
     private Mat HSVMat;
-    private Mat denoisedMat;
     private Mat outputMat;
 
     private final Mat EMPTY_MAT;
-    private boolean first = true;
-    private Mat hierarchy = new Mat();
 
     public RingLocalizerV2(Telemetry telemetry){
-        this.telemetry = telemetry;
-        denoisedMat = new Mat();
         outputMat = new Mat();
         EMPTY_MAT = new Mat();
         HSVMat = new Mat();
@@ -95,13 +77,6 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         rhs = new Mat();
         pointMat = new Mat();
     }
-
-    @Override
-    public void onViewportTapped() {
-        //Toggling through view modes on viewport tapping
-        viewmode++;
-    }
-
 
     //Measures how close to a circle the blob is.
     private double calculateCircularity(MatOfPoint contour, double area) {
@@ -156,12 +131,10 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         //Filtering our every color but the one we want(rings)
         Core.inRange(HSVMat, lowerHSV, upperHSV, HSVMat);
 
-        //Creating a Gaussian Blur on the image to reduce noise
-        Imgproc.GaussianBlur(HSVMat, HSVMat, new Size(VisionConstants.blurConstant, VisionConstants.blurConstant), 0);
-
         //Creating the kernal of 15, 15 structuring element
         Mat kernal = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2 * VisionConstants.dilationConstant + 1, 2 * VisionConstants.dilationConstant + 1));
         //Dilating the image parameters are source, destination, and kernal
+        Imgproc.erode(HSVMat, HSVMat, kernal);
         Imgproc.dilate(HSVMat, HSVMat, kernal);
 
         //Fingding the contours based on the HSV ranges
@@ -171,18 +144,16 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
         inputMat.copyTo(outputMat);
 
-        if(contoursList.size() != 0){
-            ringPositions.clear();
-        }else{
-            telemetry.addLine("HELLO WorLD");
-        }
+        ArrayList<Vector2d> ringList = new ArrayList<>();
+
+        Imgproc.drawContours(outputMat, contoursList, -1, new Scalar(0, 255, 0), 3);
 
         for (MatOfPoint contour : contoursList) {
             Moments moments = Imgproc.moments(contour);
 
             double area = moments.m00;
 
-            if (area < MIN_AREA) {
+            if (area < VisionConstants.MIN_AREA) {
                 continue;
             }
 
@@ -191,19 +162,19 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
             double circularity = calculateCircularity(contour, area);
 
-            if (circularity < MIN_CIRCULARITY) {
+            if (circularity < VisionConstants.MIN_CIRCULARITY) {
                 continue;
             }
 
             double inertiaRatio = calculateInertiaRatio(moments);
 
-            if (inertiaRatio < MIN_INERTIA_RATIO) {
+            if (inertiaRatio < VisionConstants.MIN_INERTIA_RATIO) {
                 continue;
             }
 
             double convexity = calculateConvexity(contour, area);
 
-            if (convexity < MIN_CONVEXITY) {
+            if (convexity < VisionConstants.MIN_CONVEXITY) {
                 continue;
             }
 
@@ -238,32 +209,23 @@ public class RingLocalizerV2 extends OpenCvPipeline {
             pointMat.get(0, 0, buff);
             Point3 point = new Point3(buff);
             Point3 adjustedPoint = new Point3(point.x + relPoint.x, point.y + relPoint.y, point.z + relPoint.z);
-            ringPositions.add(new Pose2d(adjustedPoint.x, adjustedPoint.y));
+            ringList.add(new Vector2d(adjustedPoint.x, adjustedPoint.y));
         }
 
-        if(outputMat.cols() != 0 && outputMat.rows() != 0) {
-            image = Bitmap.createBitmap(outputMat.cols(), outputMat.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(outputMat, image);
-            return outputMat;
-        }else{
-            return inputMat;
-        }
+        ringPositions = ringList;
+
+        //image = Bitmap.createBitmap(outputMat.cols(), outputMat.rows(), Bitmap.Config.ARGB_8888);
+        //Utils.matToBitmap(outputMat, image);
+        return outputMat;
     }
 
-    public ArrayList<Pose2d> getRingPositions(Pose2d currentPos){
-        ArrayList<Pose2d> positions = new ArrayList<>();
+    public ArrayList<Vector2d> getRingPositions(Pose2d currentPos){
+        ArrayList<Vector2d> positions = new ArrayList<>();
+
         for(int i = 0; i < ringPositions.size(); i++){
-            positions.add(i, new Pose2d(currentPos.getX() + ringPositions.get(i).getY(), currentPos.getY() - ringPositions.get(i).getX()));
+            positions.add(new Vector2d(currentPos.getX() + ringPositions.get(i).getY(), currentPos.getY() - ringPositions.get(i).getX()));
         }
 
         return positions;
-    }
-
-    public Bitmap getImage(){
-        if(image != null){
-            return image;
-        }
-
-        return Bitmap.createBitmap(640, 360, Bitmap.Config.ARGB_8888);
     }
 }

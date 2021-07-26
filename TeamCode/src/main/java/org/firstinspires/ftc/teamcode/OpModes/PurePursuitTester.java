@@ -25,9 +25,9 @@ public class PurePursuitTester extends OpMode {
         robot.updateBulkData();
         ArrayList<CurvePoint> points = new ArrayList<>();
 
-        points.add(new CurvePoint(new Pose2d(20, 55, 0), 1, 1, 10));
-        points.add(new CurvePoint(new Pose2d(0, 55, 0), 1, 1, 10));
-        points.add(new CurvePoint(new Pose2d(0, 0, 0), 1, 1, 10));
+        points.add(new CurvePoint(new Pose2d(20, 55, 0), 1, 1, 15));
+        points.add(new CurvePoint(new Pose2d(0, 55, 0), 1, 1, 15));
+        points.add(new CurvePoint(new Pose2d(0, 0, 0), 1, 1, 15));
 
         RobotMovement.followCurve(points, robot, telemetry);
     }

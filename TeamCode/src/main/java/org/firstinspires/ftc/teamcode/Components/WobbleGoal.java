@@ -10,17 +10,15 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 public class WobbleGoal {
     public final double clamp_posR = 0.8;
     public final double release_posR = 0.185;
-    public final double lift_posR = 0.65;
-    public final double drop_over_lift_posR = 0.49;
+    public final double lift_posR = 0.69;
     public final double auto_lift_posR = 0.3;
-    public final double down_posR = 0.14;
+    public final double down_posR = 0.18;
 
     public final double clamp_posL = 0.0;
     public final double release_posL = 0.67;
-    public final double lift_posL = 0.14;
-    public final double drop_over_lift_posL = 0.28;
+    public final double lift_posL = 0.21;
     public final double auto_lift_posL = 0.52;
-    public final double down_posL = 0.653;
+    public final double down_posL = 0.73;
 
 
     public Caching_Servo servo_liftRight;
@@ -30,7 +28,7 @@ public class WobbleGoal {
 
     private Telemetry telemetry;
     boolean grabberToggle = false;
-    int grabberLiftToggle = 0;
+    boolean grabberLiftToggle = false;
     boolean liftToggle = false;
 
     public WobbleGoal(HardwareMap map, Telemetry telemetry) {
@@ -98,14 +96,6 @@ public class WobbleGoal {
         }
     }
 
-    public void dropOverWallLift() {
-        if(Robot.isBlue()){
-            servo_liftLeft.setPosition(drop_over_lift_posL);
-        }else{
-            servo_liftRight.setPosition(drop_over_lift_posR);
-        }
-    }
-
     public void operate(GamepadEx gamepad, GamepadEx gamepad2) {
         if (gamepad.isPress(GamepadEx.Control.right_stick_button)) {
             grabberToggle = !grabberToggle;
@@ -123,14 +113,12 @@ public class WobbleGoal {
 
         if (liftToggle) {
             if (gamepad.isPress(GamepadEx.Control.left_stick_button)) {
-                if (grabberLiftToggle == 0) {
-                    down();
-                } else if (grabberLiftToggle == 1) {
+                if (grabberToggle) {
                     lift();
-                } else if (grabberLiftToggle == 2) {
-                    dropOverWallLift();
+                } else {
+                    down();
                 }
-                grabberLiftToggle = (grabberLiftToggle + 1) % 3;
+                grabberToggle = !grabberToggle;
             }
         } else {
             if(Robot.isBlue()){

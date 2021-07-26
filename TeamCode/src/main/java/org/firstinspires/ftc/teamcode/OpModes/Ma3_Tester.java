@@ -20,5 +20,6 @@ public class Ma3_Tester extends OpMode {
     public void loop(){
         double angle = (encoder.getVoltage()/MAX_VOLTAGE) * (2 * Math.PI);
         telemetry.addData("Encoder Data", Math.toDegrees(angle));
+        telemetry.addData("Voltage", encoder.getVoltage());
     }
 }

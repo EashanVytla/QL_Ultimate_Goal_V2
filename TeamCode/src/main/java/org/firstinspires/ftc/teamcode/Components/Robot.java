@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Components;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -16,12 +17,16 @@ import org.firstinspires.ftc.teamcode.Math.Vector2;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipelineV2;
+import org.firstinspires.ftc.teamcode.Vision.RingLocalizerV2;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
+
+import java.util.ArrayList;
 
 public class Robot {
     public Mecanum_Drive drive;
@@ -44,7 +49,7 @@ public class Robot {
     private Telemetry telemetry;
 
     OpenCvCamera webcam;
-    RingDetectionPipelineV2 detector;
+    OpenCvPipeline detector;
     Pose2d startPos = new Pose2d(0, 0, 0);
     public static Vector2d ULTIMATE_GOAL_POS;
     private static boolean blue = false;
@@ -58,9 +63,9 @@ public class Robot {
     public Robot(HardwareMap map, Telemetry telemetry){
         blue = false;
         ULTIMATE_GOAL_POS = new Vector2d(5, 136);
-        POWER_SHOT_R = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 17.20 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_M = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 25 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_R = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 17.20 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_M = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 25 - 2.47, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 2.22, Robot.ULTIMATE_GOAL_POS.getY());
         this.hardwareMap = map;
         this.telemetry = telemetry;
 
@@ -173,17 +178,25 @@ public class Robot {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        /*detector = new RingDetectionPipelineV2();
-        webcam.setPipeline(detector);*/
+        detector = new RingDetectionPipelineV2();
+        webcam.setPipeline(detector);
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
-                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                FtcDashboard.getInstance().startCameraStream(webcam, 30);
+                webcam.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
             }
         });
+    }
+
+    public void initializeRingLocalizer(){
+        detector = new RingLocalizerV2(telemetry);
+        webcam.setPipeline(detector);
+        //webcam.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
+        //Log.i("HERE", "HERE");
     }
 
     public RevBulkData getData(){
@@ -195,7 +208,7 @@ public class Robot {
     }
 
     public int getRingStackCase(){
-        return detector.getAnalysis();
+        return ((RingDetectionPipelineV2)detector).getAnalysis();
     }
 
     public void updateBulkData(){
@@ -259,8 +272,8 @@ public class Robot {
         return (angle + (2 * Math.PI)) % (2 * Math.PI);
     }
 
-    public Bitmap getWebcamImage(){
-        return detector.getImage();
+    public ArrayList<Vector2d> getRingPositions(){
+        return ((RingLocalizerV2)detector).getRingPositions(getPos());
     }
 
     public void stopWebcam(){

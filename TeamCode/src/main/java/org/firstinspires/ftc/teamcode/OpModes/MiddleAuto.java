@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
+import android.util.Log;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -15,9 +18,10 @@ import org.firstinspires.ftc.teamcode.PurePusuit.CurvePoint;
 import org.firstinspires.ftc.teamcode.PurePusuit.RobotMovement;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 @Autonomous
-public class MiddleSafetyAuto extends LinearOpMode {
+public class MiddleAuto extends LinearOpMode {
     int state = 0;
     ElapsedTime elapsedTime;
     boolean gtp = false;
@@ -28,21 +32,10 @@ public class MiddleSafetyAuto extends LinearOpMode {
     private Pose2d ZONE_1_POS = new Pose2d(17, 79, Math.toRadians(0));
     private Pose2d ZONE_2_POS = new Pose2d(-4.5, 103.5, Math.toRadians(0));
     private Pose2d ZONE_4_POS = new Pose2d(19, 109.5, Math.toRadians(325));
-
-    private Pose2d ZONE_1_2_POS = new Pose2d(11, 72, Math.toRadians(0));
-    private Pose2d ZONE_2_2_POS = new Pose2d(-8.5, 95.5, Math.toRadians(0));
-    private Pose2d ZONE_4_2_POS = new Pose2d(11, 119.5, Math.toRadians(325));
-
-    private Pose2d WOBBLE_POS_2 = new Pose2d(0.5, 18.2, Math.toRadians(0));
-    private Pose2d PARK = new Pose2d(-6.6, 75.3, Math.toRadians(0));
-
-    //0.863
+    private Pose2d PARK = new Pose2d(-16.6, 75.3, Math.toRadians(0));
 
     private int ringCase = 0;
-
-    private double powerShotAngle1 = 144.18; // Center
-    private double powerShotAngle2 = 150; //Left
-    private double powerShotAngle3 = 138; //Right
+    ArrayList<Vector2d> bounceBackPoints = new ArrayList<>();
 
     @Override
     public void runOpMode() {
@@ -54,18 +47,20 @@ public class MiddleSafetyAuto extends LinearOpMode {
 
         robot.intake.write();
 
+        robot.setStartPose(new Pose2d(-13.5, 0));
+
         //Blue Side
         /*robot.blue();
         robot.inverse();
          */
 
-        //robot.initializeWebcam();
+        boolean firstBB = true;
+
+        robot.initializeWebcam();
 
         while(!isStarted() && !isStopRequested()){
-            //FtcDashboard.getInstance().sendImage(robot.getWebcamImage());
-            //ringCase = robot.getRingStackCase();
-            ringCase = 1;
-            //telemetry.addData("Gyro", Math.toDegrees(robot.localizer.gyro.getAngleCorrected()));
+            ringCase = robot.getRingStackCase();
+
             telemetry.addData("Ring Case", ringCase);
 
             if(gamepad1.a){
@@ -88,9 +83,9 @@ public class MiddleSafetyAuto extends LinearOpMode {
             elapsedTime.reset();
         }
 
-        //robot.stopWebcam();
-
         waitForStart();
+
+        //robot.stopWebcam();
 
         elapsedTime.startTime();
 
@@ -115,17 +110,18 @@ public class MiddleSafetyAuto extends LinearOpMode {
                     break;
                 case 1:
                     points.add(new CurvePoint(new Pose2d(0, 0, Math.toRadians(0)), 1d, 1d, 25));
-                    points.add(new CurvePoint(new Pose2d(-16d, 27d, Math.toRadians(0)), 1d, 1d, 25));
+                    points.add(new CurvePoint(new Pose2d(-16d, 27d, Math.toRadians(0)), 0.75d, 1d, 25));
                     points.add(new CurvePoint(POWER_SHOT_POS, 0.75d, 1.0d, 25));
 
                     if(powershotBool){
                         robot.wobbleGoal.servo_liftRight.setPosition(0);
                         if(elapsedTime.time() > 3.0){
                             robot.shooter.flywheelMotor.setPower(0.0);
-                            elapsedTime.reset();
                             robot.shooter.resetPID();
                             robot.drive.resetPID();
                             robot.wobbleGoal.autoLift();
+                            elapsedTime.reset();
+                            firstBB = true;
                             state++;
                         }else{
                             if(elapsedTime.time() > 2.0){
@@ -148,6 +144,10 @@ public class MiddleSafetyAuto extends LinearOpMode {
                                 }
                             }else{
                                 //FIRST POWERSHOT
+                                if(firstBB){
+                                    robot.initializeRingLocalizer();
+                                    firstBB = false;
+                                }
                                 robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
                                 robot.shooter.setRotator(1, robot.getPos());
                                 if(elapsedTime.time() > 0.5){
@@ -161,15 +161,42 @@ public class MiddleSafetyAuto extends LinearOpMode {
                         if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 1.0 && Math.abs(Robot.wrapHeading(robot.getPos().getHeading())) < Math.toRadians(1.0)){
                             powershotBool = true;
                         }
+
                         elapsedTime.reset();
                         robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
                         robot.shooter.setRotator(1, robot.getPos());
                     }
 
-                    robot.shooter.setFlywheelVelocity(1750, flywheelVelo);
+                    robot.shooter.setFlywheelVelocity(1350, flywheelVelo);
 
                     break;
                 case 2:
+                    if (elapsedTime.time() > 0.5){
+                        robot.intake.setPower(1.0);
+                        if(firstBB){
+                            robot.stopWebcam();
+                            sortTargets();
+                            firstBB = false;
+                        }
+                        points.add(new CurvePoint(POWER_SHOT_POS.getX(), POWER_SHOT_POS.getY(), 1.0, 1.0, 5.0, 0));
+                        for(int i = 0; i < bounceBackPoints.size(); i++){
+                            points.add(new CurvePoint(bounceBackPoints.get(i).getX(), bounceBackPoints.get(i).getY() - 13, 1.0, 1.0, 5.0, 0));
+                        }
+
+                        if(points.size() != 0){
+                            if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 1.0){
+                                elapsedTime.reset();
+                                state++;
+                            }
+                        }else{
+                            state++;
+                        }
+                    }else{
+                        bounceBackPoints = robot.getRingPositions();
+                        telemetry.addData("BounceBack Size", String.valueOf(bounceBackPoints.size()));
+                    }
+                    break;
+                case 3:
                     robot.shooter.setFlywheelPower(0.0);
                     points.add(new CurvePoint(new Pose2d(-21d, 56d, Math.toRadians(0)), 1d, 1d, 25));
                     switch (ringCase){
@@ -185,6 +212,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                     }
 
                     if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 2){
+                        robot.intake.setPower(0.0);
                         if(elapsedTime.time() > 1.5){
                             elapsedTime.reset();
                             robot.drive.resetPID();
@@ -205,7 +233,7 @@ public class MiddleSafetyAuto extends LinearOpMode {
                     }
 
                     break;
-                case 3:
+                case 4:
                     robot.intake.barUp();
                     gtp = true;
                     points.add(new CurvePoint(new Pose2d(12.3, 109.75, Math.toRadians(325)), 0.5d, 0.5d, 25));
@@ -234,11 +262,25 @@ public class MiddleSafetyAuto extends LinearOpMode {
             robot.shooter.write();
             robot.intake.write();
 
-            telemetry.addData("Size", points.size());
-
             telemetry.addData("Position", robot.getPos());
             telemetry.addData("State", state);
             telemetry.update();
+        }
+    }
+
+    public void sortTargets(){
+        for(int i = 0; i < bounceBackPoints.size(); i++){
+            int min = i;
+            for(int j = i + 1; j < bounceBackPoints.size(); j++){
+                if(bounceBackPoints.get(min).getY() > bounceBackPoints.get(j).getY()){
+                    min = j;
+                }
+                Collections.swap(bounceBackPoints, min, i);
+            }
+        }
+
+        if(bounceBackPoints.size() > 3){
+            bounceBackPoints.subList(3, bounceBackPoints.size()).clear();
         }
     }
 }

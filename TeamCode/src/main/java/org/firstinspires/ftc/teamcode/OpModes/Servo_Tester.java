@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 @TeleOp
 public class Servo_Tester extends LinearOpMode {
     //Set the hardware mapping name of the servo
-    final String name = "flicker";
+    final String name = "stopper";
 
     Servo servo;
     private double pos;
