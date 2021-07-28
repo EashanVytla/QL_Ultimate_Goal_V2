@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 @Autonomous
-public class MiddleAuto extends LinearOpMode {
+public class Auto_15959 extends LinearOpMode {
     int state = 0;
     ElapsedTime elapsedTime;
     boolean gtp = false;
@@ -34,7 +34,6 @@ public class MiddleAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
         elapsedTime = new ElapsedTime();
         robot = new Robot(hardwareMap, telemetry);
         robot.localizer.reset();
@@ -56,6 +55,7 @@ public class MiddleAuto extends LinearOpMode {
 
         while(!isStarted() && !isStopRequested()){
             ringCase = robot.getRingStackCase();
+            ringCase = 4;
 
             telemetry.addData("Ring Case", ringCase);
 

@@ -61,6 +61,7 @@ public class RingLocalizerTester extends OpMode {
     @Override
     public void loop() {
         robot.updateBulkData();
+        robot.updatePos();
         //FtcDashboard.getInstance().sendImage(pipeline.getImage());
         if(gamepadEx.isPress(GamepadEx.Control.a)){
             toggle = true;
@@ -96,7 +97,10 @@ public class RingLocalizerTester extends OpMode {
                 telemetry.addLine("No rings found...");
             }
 
+            robot.drive.drive(gamepad1, 1.0, 1.0);
+
             robot.intake.setPower(0.0);
+            robot.drive.write();
         }
 
         telemetry.addData("targets", toggle);

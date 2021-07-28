@@ -85,7 +85,6 @@ public class ContourTester extends LinearOpMode
             /*
              * Send some stats to the telemetry
              */
-            FtcDashboard.getInstance().sendImage(pipeline.getImage());
             telemetry.addData("Analysis", pipeline.getAnalysis());
 
 

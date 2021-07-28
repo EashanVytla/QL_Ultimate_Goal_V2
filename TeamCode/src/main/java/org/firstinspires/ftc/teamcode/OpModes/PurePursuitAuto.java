@@ -59,12 +59,10 @@ public class PurePursuitAuto extends LinearOpMode {
         robot.inverse();
          */
 
-        //robot.initializeWebcam();
+        robot.initializeWebcam();
 
         while(!isStarted() && !isStopRequested()){
-            //FtcDashboard.getInstance().sendImage(robot.getWebcamImage());
-            //ringCase = robot.getRingStackCase();
-            ringCase = 1;
+            ringCase = robot.getRingStackCase();
             //telemetry.addData("Gyro", Math.toDegrees(robot.localizer.gyro.getAngleCorrected()));
             telemetry.addData("Ring Case", ringCase);
 
@@ -88,7 +86,7 @@ public class PurePursuitAuto extends LinearOpMode {
             elapsedTime.reset();
         }
 
-        //robot.stopWebcam();
+        robot.stopWebcam();
 
         waitForStart();
 

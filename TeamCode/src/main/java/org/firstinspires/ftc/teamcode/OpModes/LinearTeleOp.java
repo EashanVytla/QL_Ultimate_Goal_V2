@@ -38,6 +38,7 @@ public class LinearTeleOp extends LinearOpMode {
             robot.updateBulkData();
 
             if(gamepad1ex.isPress(GamepadEx.Control.back)){
+                shooter.bigPID = true;
                 robot.localizer.reset();
             }
 

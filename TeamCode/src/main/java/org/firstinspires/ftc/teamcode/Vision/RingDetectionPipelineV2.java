@@ -31,8 +31,6 @@ public class RingDetectionPipelineV2 extends OpenCvPipeline
     List<MatOfPoint> contoursList = new ArrayList<>();
     int numContoursFound = 0;
 
-    private Bitmap image;
-
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
@@ -82,12 +80,12 @@ public class RingDetectionPipelineV2 extends OpenCvPipeline
 
             //[0, 96, 0], [77, 255, 255]
             // Show chosen result
-            if(rect.area() >= 1000) {
+            if(rect.area() >= 2000) {
                 Imgproc.rectangle(contoursOnFrameMat, rect.tl(), rect.br(), new Scalar(255, 0, 0), 2);
                 Imgproc.putText(contoursOnFrameMat, String.valueOf(rect.area()), rect.tl(), 0, 0.5, new Scalar(255, 255, 255));
             }
 
-            if(rect.area() < 5000 && rect.area() > 1000){
+            if(rect.area() < 7000 && rect.area() > 2000){
                 contoursExist = true;
                 ringRect = rect;
             }
@@ -95,9 +93,9 @@ public class RingDetectionPipelineV2 extends OpenCvPipeline
 
         dashboardTelemetry.addData("rinlg rect area", ringRect.area());
 
-        if(ringRect.area() > 2000){
+        if(ringRect.area() > VisionConstants.FOUR_RING_THRESHOLD){
             ringCase = 4;
-        }else if(ringRect.area() > 1000){
+        }else if(ringRect.area() > VisionConstants.ONE_RING_THRESHOLD){
             ringCase = 1;
         }else{
             ringCase = 0;
@@ -107,19 +105,9 @@ public class RingDetectionPipelineV2 extends OpenCvPipeline
             ringCase = 0;
         }
 
-        image = Bitmap.createBitmap(contoursOnFrameMat.cols(), contoursOnFrameMat.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(contoursOnFrameMat, image);
-
         dashboardTelemetry.update();
 
-        return input;
-    }
-
-    public Bitmap getImage(){
-        if(image != null){
-            return image;
-        }
-        return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        return contoursOnFrameMat;
     }
 
     @Override

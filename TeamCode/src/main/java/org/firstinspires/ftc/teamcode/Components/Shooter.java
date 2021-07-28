@@ -52,13 +52,13 @@ public class Shooter {
     private final double ROTATOR_MAX; //Rotator Max Angle
 
     //PID constants for the flywheel (static for dashboard live tuning purposes)
-    public static double kpF = 0.01;
+    public static double kpF = 0.005;
     public static double kiF = 0;
     public static double kdF = 0.0001;
 
     //PID constants for the Bucket Rotator (static for dashboard live tuning purposes)
-    public static double kpR = 4.75;
-    public static double kiR = 4.75;
+    public static double kpR = 4.0;
+    public static double kiR = 4.0;
     public static double kdR = 0.006;
 
     //PID constants for Larger Distances on the Bucket Rotator (static for dashboard live tuning purposes)
@@ -76,7 +76,7 @@ public class Shooter {
 
     private int powerShotToggle = 0;
 
-    private boolean bigPID = true;
+    public boolean bigPID = true;
     private double flapOffset = 0.0;
     private double rotatorOffset = 0.0;
     private ElapsedTime timer = new ElapsedTime();
@@ -96,7 +96,7 @@ public class Shooter {
         ROTATOR_MIN = Math.toRadians(120);
         ROTATOR_MAX = Math.toRadians(173);
         ROTATOR_0 = Math.toRadians(145);
-        Ma3_Offset = Math.toRadians(159.7);
+        Ma3_Offset = Math.toRadians(155.67);
 
         flywheelPIDController = new PIDFController(new PIDCoefficients(kpF, kiF, kdF));
         feedForward = new SimpleMotorFeedforward(kS, kV);
@@ -136,12 +136,12 @@ public class Shooter {
     }
 
     public double getFlapPosPowerShot(double distance){
-        double newDist = Range.clip(distance, 75, 105);
-        double a = 9.8181818181719e-8 * Math.pow(newDist, 4);
-        a += -3.4723232323197e-5 * Math.pow(newDist, 3);
-        a += 0.0045869999999952 * Math.pow(newDist, 2);
-        a += -0.26865109668081 * newDist;
-        a += 6.7524999999936;
+        double newDist = Range.clip(distance, 75, 96);
+        double a = 3.4703202083756e-6 * Math.pow(newDist, 4);
+        a += -0.0011858207514808 * Math.pow(newDist, 3);
+        a += 0.15161497553566 * Math.pow(newDist, 2);
+        a += -8.5944060617632 * newDist;
+        a += 183.13460262331;
 
         /*double[] arr = new double[] {-3.98641555e-15,  6.16910146e-07,  3.83054854e-05, -8.13602663e-07,
                 4.57405101e-09};
@@ -152,7 +152,7 @@ public class Shooter {
             a += arr[i] * Math.pow(newDist, i + 1);
         }*/
 
-        return Range.clip(a + 0.063, FLAP_MIN, FLAP_MAX);
+        return Range.clip(a, FLAP_MIN, FLAP_MAX);
     }
 
     public void resetPID(){
@@ -351,7 +351,7 @@ public class Shooter {
             if(powerShotToggle == 0) {
                 setFlywheelVelocity(flywheelTargetVelo, flywheelVelo);
             }else{
-                setFlywheelVelocity(1350, flywheelVelo);
+                setFlywheelVelocity(1360, flywheelVelo);
             }
 
             //Only occurs one to reset the flicker timer and position
@@ -397,20 +397,18 @@ public class Shooter {
             telemetry.addData("Dist to Left Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_L));
         }
 
-        telemetry.addData("Flap Offset", flapOffset);
-
         if(bigPID){
             setRotator(powerShotToggle, currentPos);
-            if(Math.toDegrees(Math.abs(rotatorPIDController2.getLastError())) < 1){
-                bigPID = false;
+            if(Math.toDegrees(Math.abs(rotatorPIDController2.getLastError())) < 2){
+                if(timer.time() > 0.75){
+                    bigPID = false;
+                }
+            }else{
+                timer.reset();
             }
         }else{
             setRotator(powerShotToggle, currentPos, false);
         }
-
-        telemetry.addData("Rotator 2 Error", rotatorPIDController2.getLastError());
-
-        telemetry.addData("BIG PID", bigPID);
 
         //Flap Regression Tuning
         //_________________________________________________________
@@ -425,8 +423,6 @@ public class Shooter {
         setFlap(flapTesterPos);*/
         //----------------------------------------------------------
 
-        telemetry.addData("Rotator Angle", Math.toDegrees(getRotatorPos()));
-        telemetry.addData("Powershot Toggle", powerShotToggle);
         telemetry.addData("Dist to Right Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_R));
         telemetry.addData("Flap Position", flapTesterPos);
     }

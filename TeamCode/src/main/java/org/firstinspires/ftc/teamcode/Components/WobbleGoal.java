@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 public class WobbleGoal {
     public final double clamp_posR = 0.8;
     public final double release_posR = 0.185;
-    public final double lift_posR = 0.69;
+    public final double lift_posR = 0.71;
     public final double auto_lift_posR = 0.3;
     public final double down_posR = 0.18;
 

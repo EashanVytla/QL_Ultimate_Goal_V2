@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 @Config
 public class Flicker {
     public static double outPos = 0.23;
-    public static double inPos = 0.30;
+    public static double inPos = 0.31;
     public static double flickerSpeed = 70;
 
     Telemetry telemetry;

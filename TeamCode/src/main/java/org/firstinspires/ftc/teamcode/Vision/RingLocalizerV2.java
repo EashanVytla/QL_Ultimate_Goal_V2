@@ -29,7 +29,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
     List<MatOfPoint> contoursList = new ArrayList<>(); //Array of all contours
     int numContoursFound = 0;
 
-    public Point3 relPoint = new Point3(-29.875, 0, 0);
+    public Point3 relPoint = new Point3(-36, 0, 0);
 
     //Extrinsic Calibration Parameters
     public Mat RVEC; // Rotation Vector Of Camera found through Calibration
@@ -66,8 +66,8 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         EMPTY_MAT = new Mat();
         HSVMat = new Mat();
 
-        RVEC = new MatOfDouble(1.601611450052856, 1.613751506036699, -0.8875590124183879);
-        TVEC = new MatOfDouble(0.3601768248571578, 1.989997402719623, 31.69340435872514);
+        RVEC = new MatOfDouble(1.573170512100423, 1.55992815372063, -0.8995313429429516);
+        TVEC = new MatOfDouble(-0.4223866364049191, 0.5307423920270103, 36.44426518615748);
         CALIB_PARAMS = new CalibrationParameters(496.222, 499.292,
                 322.836, 176.195, 0.0597197, -0.0908114, 0.0153578, -0.00202418, 0.0395567);
 
@@ -134,7 +134,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         //Creating the kernal of 15, 15 structuring element
         Mat kernal = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2 * VisionConstants.dilationConstant + 1, 2 * VisionConstants.dilationConstant + 1));
         //Dilating the image parameters are source, destination, and kernal
-        Imgproc.erode(HSVMat, HSVMat, kernal);
+        //Imgproc.erode(HSVMat, HSVMat, kernal);
         Imgproc.dilate(HSVMat, HSVMat, kernal);
 
         //Fingding the contours based on the HSV ranges
@@ -223,7 +223,9 @@ public class RingLocalizerV2 extends OpenCvPipeline {
         ArrayList<Vector2d> positions = new ArrayList<>();
 
         for(int i = 0; i < ringPositions.size(); i++){
-            positions.add(new Vector2d(currentPos.getX() + ringPositions.get(i).getY(), currentPos.getY() - ringPositions.get(i).getX()));
+            if(currentPos.getY() - ringPositions.get(i).getX() < 135) {
+                positions.add(new Vector2d(currentPos.getX() + ringPositions.get(i).getY(), currentPos.getY() - ringPositions.get(i).getX()));
+            }
         }
 
         return positions;

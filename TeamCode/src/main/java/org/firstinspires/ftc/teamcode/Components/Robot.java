@@ -258,7 +258,7 @@ public class Robot {
 
     public Pose2d getPos(){
         if(blue){
-            return new Pose2d(-localizer.getPose().getX() - startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());
+            return new Pose2d(-localizer.getPose().getX() - startPos.getX(), localizer.getPose().getY() + startPos.getY(), (2 * Math.PI) - (localizer.getPose().getHeading() + startPos.getHeading()));
         }else{
             return new Pose2d(localizer.getPose().getX() + startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());
         }
