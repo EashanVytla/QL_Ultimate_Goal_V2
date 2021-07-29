@@ -64,16 +64,10 @@ public class Robot {
     public Robot(HardwareMap map, Telemetry telemetry){
         blue = false;
         ULTIMATE_GOAL_POS = new Vector2d(5, 136);
-<<<<<<< HEAD
-        ULTIMATE_GOAL2_POS = new Vector2d(-69,136);
-        POWER_SHOT_R = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 17.20 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_M = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 25 - 2.57, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
-=======
+        ULTIMATE_GOAL2_POS = new Vector2d(5,-69);
         POWER_SHOT_R = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 17.20 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
         POWER_SHOT_M = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 25 - 2.47, Robot.ULTIMATE_GOAL_POS.getY());
         POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 2.22, Robot.ULTIMATE_GOAL_POS.getY());
->>>>>>> master
         this.hardwareMap = map;
         this.telemetry = telemetry;
 

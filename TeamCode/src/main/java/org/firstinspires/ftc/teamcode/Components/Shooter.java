@@ -185,7 +185,7 @@ public class Shooter {
 
     public void setRotator(Pose2d currentPos) {
         telemetry.addData("Mid Goal Toggle", midGoalToggle);
-        double targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2(((midGoalToggle ? Robot.ULTIMATE_GOAL_POS2.getX() : Robot.ULTIMATE_GOAL_POS.getX()) - currentPos.getX()), (((midGoalToggle ? Robot.ULTIMATE_GOAL_POS2.getY() : Robot.ULTIMATE_GOAL_POS.getY()) - currentPos.getY())));
+        double targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2(((midGoalToggle ? Robot.ULTIMATE_GOAL2_POS.getX() : Robot.ULTIMATE_GOAL_POS.getX()) - currentPos.getX()), (((midGoalToggle ? Robot.ULTIMATE_GOAL_POS2.getY() : Robot.ULTIMATE_GOAL_POS.getY()) - currentPos.getY())));
         double heading = currentPos.getHeading();
 
         if(heading <  2 * Math.PI && heading >= Math.PI){
@@ -418,7 +418,7 @@ public class Shooter {
                 setFlap(0.9);
             } else {
                 if (midGoalToggle){
-                    setFlap(getFlapPosMiddle(Robot.ULTIMATE_GOAL_POS2.distTo(currentPos.vec())));
+                    setFlap(getFlapPosMiddle(Robot.ULTIMATE_GOAL2_POS.distTo(currentPos.vec())));
                 } else {
                     setFlap(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())) + flapOffset);
                 }
