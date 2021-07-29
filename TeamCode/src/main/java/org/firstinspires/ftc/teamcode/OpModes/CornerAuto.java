@@ -110,13 +110,25 @@ public class CornerAuto extends LinearOpMode {
                             robot.shooter.setFlywheelPower(0.0);
                             state++;
                         }else{
-                            robot.shooter.setFlywheelVelocity(2000, robot.shooter.getFlywheelVelcoity(robot.getData2()));
-                            if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1940 && elapsedTime.time() > 0.5){
-                                robot.shooter.flicker.flick();
-                            }
                             robot.shooter.setRotator(robot.getPos());
+
+                            if(Math.abs(robot.shooter.getRotatorError()) < Math.toRadians(0.25)){
+                                robot.shooter.resetRotatorPID();
+                            }
+
+                            robot.shooter.setFlywheelVelocity(2000, robot.shooter.getFlywheelVelcoity(robot.getData2()));
+                            if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1980 && Math.abs(robot.shooter.getRotatorError()) < Math.toRadians(0.75)){
+                                if(elapsedTime.time() > 0.25){
+                                    robot.shooter.flicker.flick();
+                                }else{
+                                    robot.shooter.flicker.resetTime();
+                                }
+
+                                robot.shooter.stopper.setPosition(robot.shooter.stopperOpen);
+                            }
                         }
                     }else{
+                        robot.shooter.resetRotatorPID();
                         robot.shooter.setFlywheelVelocity(2000, robot.shooter.getFlywheelVelcoity(robot.getData2()));
                         robot.shooter.setRotator(0, robot.getPos());
                         elapsedTime.reset();
@@ -219,11 +231,27 @@ public class CornerAuto extends LinearOpMode {
                             robot.shooter.setFlywheelPower(0.0);
                             state++;
                         }else{
-                            robot.shooter.setFlywheelVelocity(2000, robot.shooter.getFlywheelVelcoity(robot.getData2()));
-                            robot.shooter.flicker.flick();
                             robot.shooter.setRotator(robot.getPos());
+
+                            if(Math.abs(robot.shooter.getRotatorError()) < Math.toRadians(0.25)){
+                                robot.shooter.resetRotatorPID();
+                            }
+
+                            robot.shooter.setFlywheelVelocity(2000, robot.shooter.getFlywheelVelcoity(robot.getData2()));
+                            if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1980 && Math.abs(robot.shooter.getRotatorError()) < Math.toRadians(0.75)){
+                                if(elapsedTime.time() > 0.25){
+                                    robot.shooter.flicker.flick();
+                                }else{
+                                    robot.shooter.flicker.resetTime();
+                                }
+
+                                robot.shooter.stopper.setPosition(robot.shooter.stopperOpen);
+                            }
                         }
                     }else{
+                        if(Math.abs(robot.shooter.getRotatorError()) < Math.toRadians(0.25)){
+                            robot.shooter.resetRotatorPID();
+                        }
                         robot.shooter.setFlywheelVelocity(2000, robot.shooter.getFlywheelVelcoity(robot.getData2()));
                         robot.shooter.setRotator(0, robot.getPos());
                         elapsedTime.reset();

@@ -68,7 +68,7 @@ public class Flicker {
         return SystemClock.uptimeMillis() - prevTime;
     }
 
-    private void resetTime(){
+    public void resetTime(){
         prevTime = SystemClock.uptimeMillis();
     }
 
@@ -87,6 +87,14 @@ public class Flicker {
                 resetTime();
                 flickState++;
             }
+        }
+    }
+
+    public void flickOnce(){
+        if(getTime() > flickerSpeed){
+            flicker.setPosition(inPos);
+        }else{
+            flicker.setPosition(outPos);
         }
     }
 
