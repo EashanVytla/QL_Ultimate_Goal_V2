@@ -6,6 +6,7 @@ import android.util.Log;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Components.Robot;
@@ -23,14 +24,12 @@ public class RobotMovement {
         if(index >= allPoints.size() - 2 && robot.getPos().vec().distTo(new Vector2d(allPoints.get(allPoints.size() - 1).x, allPoints.get(allPoints.size() - 1).y)) <= 25){
             followMe = allPoints.get(allPoints.size() - 1);
         }else{
-            followMe = getFollowPointPath(allPoints, new Pose2d(robot.getPos().getX(), robot.getPos().getY(), robot.getPos().getHeading()), allPoints.get(index).followDistance);
+            followMe = getFollowPointPath(allPoints, new Pose2d(robot.getPos().getX(), robot.getPos().getY(), robot.getPos().getHeading()), allPoints.get(Range.clip(index, 0, allPoints.size() - 1)).followDistance);
         }
 
         index = getCurrentLine(followMe.toVec(), allPoints);
         telemetry.addData("Current Line: ", index);
         previous_index = index;
-
-        telemetry.addData("PURE PURESUIT POS", robot.getPos());
 
         robot.GoTo(followMe.x, followMe.y, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).heading, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).moveSpeed, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).moveSpeed, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).turnSpeed);
     }
@@ -77,7 +76,7 @@ public class RobotMovement {
         double previous_dist = 0;
         Vector2d maxIntersection = new Vector2d(0, 0);
 
-        for (int i = index; i < pathPoints.size() - 1; i++){
+        for (int i = 0; i < pathPoints.size() - 1; i++){
             CurvePoint start = pathPoints.get(i);
             CurvePoint end = pathPoints.get(i + 1);
             runningDistance += previous_dist;
@@ -85,35 +84,19 @@ public class RobotMovement {
             ArrayList<Vector2d> intersections = Math_Functions.lineCircleIntersection(new Vector2d(robotLocation.getX(), robotLocation.getY()), followRadius, start.toVec(), end.toVec());
 
             int closestDistance = 0;
-            int greatestLine = 0;
 
             for(int j = 0; j < intersections.size(); j++){
-                double dist = Math.hypot(intersections.get(j).getX() - pathPoints.get(i + 1).x, intersections.get(j).getY() - pathPoints.get(i + 1).y);
-                double closestDist = Math.hypot(intersections.get(closestDistance).getX() - pathPoints.get(i + 1).x, intersections.get(closestDistance).getY() - pathPoints.get(i + 1).y);
-
-                if(getCurrentLine(intersections.get(j), pathPoints) > getCurrentLine(intersections.get(greatestLine), pathPoints)){
-                    greatestLine = i;
-                }
+                thisTelemetry.addData("Line Intersection" + j, intersections.get(j));
+                double dist = intersections.get(j).distTo(end.toVec());
+                double closestDist = intersections.get(closestDistance).distTo(end.toVec());
 
                 if (dist < closestDist){
                     closestDistance = j;
                 }
             }
 
-            boolean sameLine = true;
-
-            for(int j = 0; j < intersections.size() - 1; j++){
-                if(getCurrentLine(intersections.get(j), pathPoints) != getCurrentLine(intersections.get(j + 1), pathPoints)){
-                    sameLine = false;
-                }
-            }
-
             if(intersections.size() != 0){
-                if(sameLine){
-                    followMe.setPoint(intersections.get(closestDistance));
-                }else{
-                    followMe.setPoint(intersections.get(greatestLine));
-                }
+                followMe.setPoint(intersections.get(closestDistance));
             }
 
             previous_dist = Math.hypot(end.x - start.x, end.y - start.y);
