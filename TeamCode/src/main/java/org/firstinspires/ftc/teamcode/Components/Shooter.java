@@ -37,7 +37,7 @@ public class Shooter {
     public static final double FLAP_MAX = 0.93;
 
     private final double DEGREES_TO_TICKS = (130/.825);
-    private double flapTesterPos = 0.75;
+    public static double flapTesterPos = 0.75;
 
     private final PIDFController flywheelPIDController; // PID controller for the Flywheel
     private final SimpleMotorFeedforward feedForward; // Flywheel feed-forward controller
@@ -62,9 +62,9 @@ public class Shooter {
     public static double kdR = 0.006;
 
     //PID constants for Larger Distances on the Bucket Rotator (static for dashboard live tuning purposes)
-    public static double kpR_2 = 3.5;
-    public static double kiR_2 = 0;
-    public static double kdR_2 = 0.05;
+    public static double kpR_2 = 5.0;
+    public static double kiR_2 = 4.75;
+    public static double kdR_2 = 0.085;
 
     //Feed-forward constants for the flywheel (static for dashboard live tuning purposes)
     public static double kS = 0.0;
@@ -80,7 +80,7 @@ public class Shooter {
     private double flapOffset = 0.0;
     private double rotatorOffset = 0.0;
     private boolean flapToggle = false;
-    private boolean midGoalToggle = false;
+    //private boolean midGoalToggle = false;
 
     private ElapsedTime timer = new ElapsedTime();
 
@@ -93,21 +93,22 @@ public class Shooter {
         stopper = new Caching_Servo(map, "stopper");
         rotatorEncoder = new Ma3_Encoder(map, "rotatorEncoder");
         stopper.setPosition(stopperIn);
+        flap.setPosition(0.2);
 
         write();
 
         ROTATOR_MIN = Math.toRadians(120);
         ROTATOR_MAX = Math.toRadians(173);
         ROTATOR_0 = Math.toRadians(145);
-        Ma3_Offset = Math.toRadians(120.6);
+        Ma3_Offset = Math.toRadians(122.9);
 
         flywheelPIDController = new PIDFController(new PIDCoefficients(kpF, kiF, kdF));
         feedForward = new SimpleMotorFeedforward(kS, kV);
 
         rotatorPIDController = new PIDFController(new PIDCoefficients(kpR, kiR, kdR));
         rotatorPIDController2 = new PIDFController(new PIDCoefficients(kpR_2, kiR_2, kdR_2));
-        rotatorPIDController2.setOutputBounds(-0.5, 0.5);
-        rotatorPIDController.setOutputBounds(-0.5, 0.5);
+        rotatorPIDController2.setOutputBounds(-0.3, 0.3);
+        rotatorPIDController.setOutputBounds(-0.3, 0.3);
     }
 
     // Writing to all the motors and servos
@@ -141,12 +142,23 @@ public class Shooter {
     }
 
     public double getFlapPosPowerShot(double distance){
-        double newDist = Range.clip(distance, 75, 105);
+        /*double newDist = Range.clip(distance, 75, 105);
         double a = 9.8181818181719e-8 * Math.pow(newDist, 4);
         a += -3.4723232323197e-5 * Math.pow(newDist, 3);
         a += 0.0045869999999952 * Math.pow(newDist, 2);
         a += -0.26865109668081 * newDist;
-        a += 6.7524999999936;
+        a += 6.7524999999936;*/
+
+        return 0.91;//Range.clip(a + 0.063, FLAP_MIN, FLAP_MAX);
+    }
+
+    public double getFlapPosPowerShotTeleOp(double distance){
+        double newDist = Range.clip(distance, 75, 105);
+        double a = -5.0335522203219e-8 * Math.pow(newDist, 4);
+        a += 1.8991015529528e-5 * Math.pow(newDist, 3);
+        a += -0.002663956562367633 * Math.pow(newDist, 2);
+        a += 0.16451119506176 * newDist;
+        a += -2.8980351639951;
 
         /*double[] arr = new double[] {-3.98641555e-15,  6.16910146e-07,  3.83054854e-05, -8.13602663e-07,
                 4.57405101e-09};
@@ -157,7 +169,7 @@ public class Shooter {
             a += arr[i] * Math.pow(newDist, i + 1);
         }*/
 
-        return Range.clip(a + 0.063, FLAP_MIN, FLAP_MAX);
+        return Range.clip(a, FLAP_MIN, FLAP_MAX);
     }
 
     public double getFlapPosMiddle(double distance){
@@ -190,8 +202,8 @@ public class Shooter {
     }
 
     public void setRotator(Pose2d currentPos) {
-        telemetry.addData("Mid Goal Toggle", midGoalToggle);
-        double targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2(((midGoalToggle ? Robot.ULTIMATE_GOAL2_POS.getX() : Robot.ULTIMATE_GOAL_POS.getX()) - currentPos.getX()), (((midGoalToggle ? Robot.ULTIMATE_GOAL2_POS.getY() : Robot.ULTIMATE_GOAL_POS.getY()) - currentPos.getY())));
+        //double targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2(((midGoalToggle ? Robot.ULTIMATE_GOAL2_POS.getX() : Robot.ULTIMATE_GOAL_POS.getX()) - currentPos.getX()), (((midGoalToggle ? Robot.ULTIMATE_GOAL2_POS.getY() : Robot.ULTIMATE_GOAL_POS.getY()) - currentPos.getY())));
+        double targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2((Robot.ULTIMATE_GOAL_POS.getX() - currentPos.getX()), ((Robot.ULTIMATE_GOAL_POS.getY() - currentPos.getY())));
         double heading = currentPos.getHeading();
 
         if(heading <  2 * Math.PI && heading >= Math.PI){
@@ -269,12 +281,12 @@ public class Shooter {
             setRotatorPower(-rotatorPIDController2.update(getRotatorPos()));
             telemetry.addData("Error", Math.toDegrees(rotatorPIDController2.getLastError()));
 
-            /*if(Math.abs(rotatorPIDController2.getLastError()) < Math.toRadians(0.25)){
+            if(Math.abs(rotatorPIDController2.getLastError()) < Math.toRadians(0.25)){
                 telemetry.addLine("IN RANGE!");
-                rotatorPIDController.reset();
+                rotatorPIDController2.reset();
             }else{
                 telemetry.addLine("REACHING TARGET...");
-            }*/
+            }
         }else{
             telemetry.addLine("SMALL TARGET");
             if(target > Math.PI){
@@ -352,6 +364,8 @@ public class Shooter {
         if(gamepad1Ex.isPress(GamepadEx.Control.a)){
             powerShotToggle++;
             powerShotToggle %= 4;
+            rotatorPIDController.reset();
+            rotatorPIDController2.reset();
             bigPID = true;
         }
 
@@ -386,11 +400,11 @@ public class Shooter {
 
         if (flywheelToggle) {
             //flywheelMotor.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            if(powerShotToggle == 0) {
+            //if(powerShotToggle == 0) {
                 setFlywheelVelocity(flywheelTargetVelo, flywheelVelo);
-            }else{
+            /*}else{
                 setFlywheelVelocity(1350, flywheelVelo);
-            }
+            }*/
 
             //Only occurs one to reset the flicker timer and position
             if(gamepad1Ex.isPress(GamepadEx.Control.left_trigger) || gamepad2Ex.isPress(GamepadEx.Control.left_trigger)){
@@ -427,34 +441,34 @@ public class Shooter {
             flapToggle = !flapToggle;
         }
 
-        if (gamepad1Ex.isPress(GamepadEx.Control.y)){
+        /*if (gamepad1Ex.isPress(GamepadEx.Control.y)){
             bigPID = true;
             midGoalToggle = !midGoalToggle;
-        }
+        }*/
 
         if(powerShotToggle == 0){
             if(flapToggle){
-                setFlap(0.9);
+                setFlap(0.91);
             } else {
-                if (midGoalToggle){
+                /*if (midGoalToggle){
                     setFlap(getFlapPosMiddle(Robot.ULTIMATE_GOAL2_POS.distTo(currentPos.vec())));
-                } else {
+                } else {*/
                     setFlap(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())) + flapOffset);
-                }
+                //}
             }
 
             telemetry.addData("Flap Regression Pos", getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())));
             telemetry.addData("Dist to Ultimate Goal", currentPos.vec().distTo(Robot.ULTIMATE_GOAL_POS));
         }else if(powerShotToggle == 1){
-            setFlap(getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(currentPos.vec())) + flapOffset);
+            setFlap(getFlapPosPowerShotTeleOp(Robot.POWER_SHOT_R.distTo(currentPos.vec())) + flapOffset);
             telemetry.addData("Flap Regression Pos", getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(currentPos.vec())));
             telemetry.addData("Dist to Right Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_R));
         }else if(powerShotToggle == 2){
-            setFlap(getFlapPosPowerShot(Robot.POWER_SHOT_M.distTo(currentPos.vec())) + flapOffset);
+            setFlap(getFlapPosPowerShotTeleOp(Robot.POWER_SHOT_M.distTo(currentPos.vec())) + flapOffset);
             telemetry.addData("Flap Regression Pos", getFlapPosPowerShot(Robot.POWER_SHOT_M.distTo(currentPos.vec())));
             telemetry.addData("Dist to Middle Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_M));
         }else if(powerShotToggle == 3){
-            setFlap(getFlapPosPowerShot(Robot.POWER_SHOT_L.distTo(currentPos.vec())) + flapOffset);
+            setFlap(getFlapPosPowerShotTeleOp(Robot.POWER_SHOT_L.distTo(currentPos.vec())) + flapOffset);
             telemetry.addData("Flap Regression Pos", getFlapPosPowerShot(Robot.POWER_SHOT_L.distTo(currentPos.vec())));
             telemetry.addData("Dist to Left Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_L));
         }
@@ -491,7 +505,7 @@ public class Shooter {
 
         telemetry.addData("Rotator Angle", Math.toDegrees(getRotatorPos()));
         telemetry.addData("Powershot Toggle", powerShotToggle);
-        telemetry.addData("Dist to Right Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_R));
+        telemetry.addData("Dist to Middle Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_M));
         telemetry.addData("Dist to Mid Goal", currentPos.vec().distTo(Robot.ULTIMATE_GOAL2_POS));
         telemetry.addData("Flap Position", flapTesterPos);
     }

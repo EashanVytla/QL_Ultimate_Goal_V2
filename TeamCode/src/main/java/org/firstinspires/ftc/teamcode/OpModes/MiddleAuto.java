@@ -55,6 +55,7 @@ public class MiddleAuto extends LinearOpMode {
         boolean firstBB = true;
 
         int powershot = 0;
+        boolean readyForPowershot = false;
 
         robot.initializeWebcam();
 
@@ -97,6 +98,7 @@ public class MiddleAuto extends LinearOpMode {
 
             telemetry.addData("Flywheel Velocity", flywheelVelo);
             telemetry.addData("BIG PID", bigPID);
+            telemetry.addData("Elapsed Time", elapsedTime.time());
 
             switch(state){
                 case 0:
@@ -111,130 +113,117 @@ public class MiddleAuto extends LinearOpMode {
                 case 1:
                     points.add(new CurvePoint(new Pose2d(0, 0, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(new Pose2d(-16d, 27d, Math.toRadians(0)), 0.75d, 1d, 25));
-                    points.add(new CurvePoint(POWER_SHOT_POS, 0.75d, 1.0d, 25));
-
-                    telemetry.addData("Rotator Error 1", Math.toDegrees(robot.shooter.getRotatorError()));
-                    telemetry.addData("Rotator Error 2", Math.toDegrees(robot.shooter.getRotatorError2()));
+                    points.add(new CurvePoint(POWER_SHOT_POS, 0.5d, 1.0d, 25));
 
                     if(powershotBool){
                         switch(powershot){
                             case 0:
                                 //FIRST POWERSHOT
+                                robot.shooter.setRotator(1, robot.getPos());
                                 robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
 
-                                if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && !bigPID){
-                                    robot.shooter.setRotator(1, robot.getPos(), false);
+                                if(readyForPowershot){
+                                    robot.shooter.stopper.setPosition(robot.shooter.stopperOpen);
 
-                                    if(elapsedTime.time() > 1.0){
-                                        firstBB = true;
-                                        elapsedTime.reset();
-                                        bigPID = true;
-                                        state++;
-                                    }
-
-                                    if(elapsedTime.time() > 0.75){
+                                    if(elapsedTime.time() > 0.5){
                                         robot.shooter.flicker.setPos(Flicker.inPos);
-                                    }else if(elapsedTime.time() > 0.5){
+                                    }else if(elapsedTime.time() > 0.25){
                                         robot.shooter.flicker.setPos(Flicker.outPos);
                                     }
-                                }else{
-                                    elapsedTime.reset();
-                                    if(bigPID){
-                                        robot.shooter.setRotator(1, robot.getPos());
-                                        if(Math.toDegrees(Math.abs(robot.shooter.getRotatorError2())) < 1){
-                                            bigPID = false;
-                                        }
+
+                                    if(elapsedTime.time() > 1.0){
+                                        readyForPowershot = false;
+                                        firstBB = true;
+                                        elapsedTime.reset();
+                                        powershot++;
                                     }
-
-                                    robot.shooter.setRotator(1, robot.getPos());
-                                }
-
-                                if(elapsedTime.time() > 1.0){
-                                    elapsedTime.reset();
-                                    state++;
+                                }else{
+                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && Math.abs(robot.shooter.getRotatorError2()) < Math.toRadians(0.75)){
+                                        if(elapsedTime.time() > 0.5){
+                                            readyForPowershot = true;
+                                            elapsedTime.reset();
+                                        }
+                                    }else{
+                                        elapsedTime.reset();
+                                    }
                                 }
                                 break;
                             case 1:
                                 //SECOND POWERSHOT
+                                robot.shooter.setRotator(2, robot.getPos());
                                 robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_M.distTo(robot.getPos().vec())));
-                                if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && !bigPID){
-                                    robot.shooter.setRotator(2, robot.getPos(), false);
+
+                                if(readyForPowershot){
+                                    if(elapsedTime.time() > 0.25){
+                                        robot.shooter.flicker.setPos(Flicker.inPos);
+                                    }else{
+                                        robot.shooter.flicker.setPos(Flicker.outPos);
+                                    }
 
                                     if(elapsedTime.time() > 1.0){
+                                        readyForPowershot = false;
                                         elapsedTime.reset();
-                                        bigPID = true;
-                                        state++;
-                                    }
-
-                                    if(Math.abs(robot.shooter.getRotatorError()) < Math.toRadians(0.75)){
-                                        if(elapsedTime.time() > 0.5){
-                                            robot.shooter.flicker.setPos(Flicker.inPos);
-                                        }else if(elapsedTime.time() > 0.25){
-                                            robot.shooter.flicker.setPos(Flicker.outPos);
-                                        }
+                                        powershot++;
                                     }
                                 }else{
-                                    elapsedTime.reset();
-                                    if(bigPID){
-                                        robot.shooter.setRotator(1, robot.getPos());
-                                        if(Math.toDegrees(Math.abs(robot.shooter.getRotatorError2())) < 1){
-                                            bigPID = false;
+                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && Math.abs(robot.shooter.getRotatorError2()) < Math.toRadians(0.75)){
+                                        if(elapsedTime.time() > 0.5){
+                                            readyForPowershot = true;
+                                            elapsedTime.reset();
                                         }
+                                    }else{
+                                        elapsedTime.reset();
                                     }
-
-                                    robot.shooter.resetRotatorPID();
-                                    robot.shooter.setRotator(3, robot.getPos());
                                 }
                                 break;
                             case 2:
                                 //THIRD POWERSHOT
+                                robot.shooter.setRotator(3, robot.getPos());
                                 robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_L.distTo(robot.getPos().vec())));
-                                if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && !bigPID){
-                                    robot.shooter.setRotator(3, robot.getPos(), false);
+
+                                if(readyForPowershot){
+                                    if(elapsedTime.time() > 0.25){
+                                        robot.shooter.flicker.setPos(Flicker.inPos);
+                                    }else{
+                                        robot.shooter.flicker.setPos(Flicker.outPos);
+                                    }
 
                                     if(elapsedTime.time() > 1.0){
+                                        readyForPowershot = false;
                                         firstBB = true;
+                                        robot.shooter.setFlywheelPower(0.0);
                                         elapsedTime.reset();
-                                        bigPID = true;
                                         state++;
                                     }
 
-                                    if(Math.abs(robot.shooter.getRotatorError()) < Math.toRadians(0.75)){
-                                        if(elapsedTime.time() > 0.5){
-                                            robot.shooter.flicker.setPos(Flicker.inPos);
-                                        }else if(elapsedTime.time() > 0.25){
-                                            robot.shooter.flicker.setPos(Flicker.outPos);
-                                        }
-                                    }
                                 }else{
-                                    elapsedTime.reset();
-                                    if(bigPID){
-                                        robot.shooter.setRotator(3, robot.getPos());
-                                        if(Math.toDegrees(Math.abs(robot.shooter.getRotatorError2())) < 1){
-                                            bigPID = false;
+                                    robot.shooter.flicker.setPos(Flicker.inPos);
+                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && Math.abs(robot.shooter.getRotatorError2()) < Math.toRadians(0.75)){
+                                        if(elapsedTime.time() > 1.0){
+                                            readyForPowershot = true;
+                                            elapsedTime.reset();
                                         }
+                                    }else{
+                                        elapsedTime.reset();
                                     }
-                                    elapsedTime.reset();
                                 }
                                 break;
                         }
-
-                        robot.shooter.stopper.setPosition(robot.shooter.stopperOpen);
                     }else{
                         elapsedTime.reset();
                         if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 1.0 && Math.abs(Robot.wrapHeading(robot.getPos().getHeading())) < Math.toRadians(1.0)){
                             powershotBool = true;
                             robot.initializeRingLocalizer();
-                            bigPID = true;
-                            robot.shooter.stopper.setPosition(robot.shooter.stopperOpen);
+                            robot.shooter.resetRotatorPID();
                         }
 
-                        robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
                         robot.shooter.setRotator(1, robot.getPos());
-                        robot.shooter.resetRotatorPID();
                     }
 
-                    robot.shooter.setFlywheelVelocity(1360, flywheelVelo);
+                    telemetry.addData("POWERSHOT", powershot);
+                    telemetry.addData("CHECK THIS", readyForPowershot);
+
+                    robot.shooter.setFlywheelVelocity(1460, flywheelVelo);
 
                     break;
                 case 2:
@@ -246,7 +235,7 @@ public class MiddleAuto extends LinearOpMode {
                         }
                         points.add(new CurvePoint(POWER_SHOT_POS.getX(), POWER_SHOT_POS.getY(), 1.0, 1.0, 5.0, 0));
                         for(int i = 0; i < bounceBackPoints.size(); i++){
-                            points.add(new CurvePoint(bounceBackPoints.get(i).getX(), bounceBackPoints.get(i).getY() - 12, 1.0, 1.0, 5.0, 0));
+                            points.add(new CurvePoint(bounceBackPoints.get(i).getX(), bounceBackPoints.get(i).getY() - 10, 1.0, 1.0, 5.0, 0));
                         }
 
                         robot.intake.setPower(1.0);
