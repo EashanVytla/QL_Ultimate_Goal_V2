@@ -10,35 +10,36 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class Intake {
     private Caching_Motor[] intake = new Caching_Motor[2];
+    private final double leftDropDownClose = 0.85;
+    private final double leftDropDownRelease = 0.98;
+    private final double rightDropDownClose = 0.1375;
+    private final double rightDropDownRelease = 0.0;
+
+    private Caching_Servo dropDownL;
+    private Caching_Servo dropDownR;
 
     public boolean toggle;
     public static boolean isOff = true;
     public static boolean pause = false;
-    //public Caching_Servo bar;
-
-    private double barUp = 0.338;
-    private double barDown = 0.69;
-    private double barMid = 0.616;
-
-    private boolean barToggle = false;
-
-    public double barClosePos = 0.5;
-    private double barOpenPos = 0.85;
 
     public Intake(HardwareMap map, Telemetry telemetry){
         toggle = false;
         pause = false;
         intake[0] = new Caching_Motor(map, "intake_left");
         intake[1] = new Caching_Motor(map, "intake_right");
-        //bar = new Caching_Servo(map, "bar");
+
+        dropDownL = new Caching_Servo(map, "dropdownL");
+        dropDownR = new Caching_Servo(map, "dropdownR");
     }
 
-    public void barDown(){
-        //bar.setPosition(barDown);
+    public void initAuto(){
+        dropDownL.setPosition(leftDropDownClose);
+        dropDownR.setPosition(rightDropDownClose);
     }
 
-    public void barUp(){
-        //bar.setPosition(barUp);
+    public void release(){
+        dropDownL.setPosition(leftDropDownRelease);
+        dropDownR.setPosition(rightDropDownRelease);
     }
 
     public void setPower(double power){
@@ -47,24 +48,15 @@ public class Intake {
     }
 
     public void write(){
+        dropDownL.write();
+        dropDownR.write();
         intake[0].write();
         intake[1].write();
-        //bar.write();
     }
 
     public void operate(GamepadEx gamepad, GamepadEx gamepad2){
         if(gamepad.isPress(GamepadEx.Control.right_bumper) || gamepad2.isPress(GamepadEx.Control.right_bumper)){
             toggle = !toggle;
-        }
-
-        if(gamepad.isPress(GamepadEx.Control.b)){
-            barToggle = !barToggle;
-        }
-
-        if (barToggle) {
-            //bar.setPosition(barMid);
-        }else{
-            //bar.setPosition(barDown);
         }
 
         if((gamepad.gamepad.left_bumper || gamepad2.gamepad.left_bumper) && !pause){

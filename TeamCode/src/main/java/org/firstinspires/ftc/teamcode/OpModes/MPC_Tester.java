@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -31,6 +32,7 @@ import java.util.Vector;
 
 //If you want to be able to run the OpMode then you need this. The name is optional.
 @Autonomous
+@Disabled
 //Make sure that you extend to OpMode to access the robot properly.
 public class MPC_Tester extends LinearOpMode {
     private static final boolean MOTORS_CONFIGURED = false;

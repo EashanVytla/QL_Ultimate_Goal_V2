@@ -178,7 +178,7 @@ public class Mecanum_Drive{
         PID_Y.setTargetPosition(targetPos.getY());
         PID_Z.setTargetPosition(target_heading);
 
-        setPowerCentic(Robot.isBlue() ? -PID_X.update(currentPos.getX()) : PID_X.update(currentPos.getX()), -PID_Y.update(currentPos.getY()), PID_Z.update(heading), currentPos.getHeading());
+        setPowerCentic(Robot.isBlue() ? -PID_X.update(currentPos.getX()) : PID_X.update(currentPos.getX()), -PID_Y.update(currentPos.getY()), Robot.isBlue() ? -PID_Z.update(heading) : PID_Z.update(heading), (Robot.isBlue() ? -currentPos.getHeading() : currentPos.getHeading()) + (Robot.isBlue() ? (2 * Math.PI) : 0));
     }
 
     public void goToPointFF(Pose2d targetPos, Pose2d currentPos, double maxPow, double FLff, double BLff, double FRff, double BRff) {

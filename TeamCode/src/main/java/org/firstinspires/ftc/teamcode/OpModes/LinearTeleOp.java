@@ -26,7 +26,6 @@ public class LinearTeleOp extends LinearOpMode {
 
         gamepad1ex = new GamepadEx(gamepad1);
         gamepad2ex = new GamepadEx(gamepad2);
-        robot.intake.barDown();
         robot.wobbleGoal.clamp();
         robot.wobbleGoal.write();
 
@@ -37,8 +36,12 @@ public class LinearTeleOp extends LinearOpMode {
         while(opModeIsActive()){
             robot.updateBulkData();
 
+            telemetry.addData("Start Pos", robot.getStartPos());
+            telemetry.addData("Blue? ", Robot.isBlue());
+
             if(gamepad1ex.isPress(GamepadEx.Control.back)){
                 shooter.bigPID = true;
+                robot.setStartPose(new Pose2d(0, 0, 0));
                 robot.localizer.reset();
             }
 

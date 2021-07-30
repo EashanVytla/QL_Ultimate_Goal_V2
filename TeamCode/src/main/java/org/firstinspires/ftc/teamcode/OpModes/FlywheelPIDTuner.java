@@ -4,11 +4,13 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import static org.firstinspires.ftc.teamcode.Components.Shooter.*;
 
 @Autonomous
+@Disabled
 public class FlywheelPIDTuner extends OpMode {
     Motor motor;
     TelemetryPacket packet;

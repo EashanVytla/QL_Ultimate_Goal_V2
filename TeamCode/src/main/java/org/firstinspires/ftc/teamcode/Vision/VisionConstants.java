@@ -14,9 +14,9 @@ public class VisionConstants {
     public static int FOUR_RING_THRESHOLD = 4000;
     public static int ONE_RING_THRESHOLD = 1000;
 
-    public static double MIN_CIRCULARITY = 0.5;
+    public static double MIN_CIRCULARITY = 0;//0.5;
     public static double MIN_INERTIA_RATIO = 0.06;
-    public static double MIN_CONVEXITY = 0.9;
+    public static double MIN_CONVEXITY = 0;//0.9;
 
     public static double lowerH = 15;
     public static double lowerS = 90;
@@ -28,6 +28,6 @@ public class VisionConstants {
     public static double MIN_AREA = 200;
 
     public static double blurConstant = 5;
-    public static double dilationConstant = 2;
+    public static double dilationConstant = 1.5;
     public static double erosionConstant = 1;
 }

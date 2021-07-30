@@ -50,9 +50,10 @@ public class Robot {
 
     OpenCvCamera webcam;
     OpenCvPipeline detector;
-    Pose2d startPos = new Pose2d(0, 0, 0);
+    private static Pose2d startPos = new Pose2d(0, 0, 0);
     public static Vector2d ULTIMATE_GOAL_POS;
     public static Vector2d ULTIMATE_GOAL2_POS;
+    public static Vector2d BLUE_GOAL_POS;
     private static boolean blue = false;
     public static Vector2d POWER_SHOT_R;
     public static Vector2d POWER_SHOT_M;
@@ -63,11 +64,11 @@ public class Robot {
 
     public Robot(HardwareMap map, Telemetry telemetry){
         blue = false;
-        ULTIMATE_GOAL_POS = new Vector2d(5, 136);
+        ULTIMATE_GOAL_POS = new Vector2d(7, 136);
         ULTIMATE_GOAL2_POS = new Vector2d(5,-69);
-        POWER_SHOT_R = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 17.20 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_M = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 25 - 2.47, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_L = new Vector2d(Robot.ULTIMATE_GOAL_POS.getX() - 32.25 - 2.22, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_R = new Vector2d(5 - 17.20 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_M = new Vector2d(5 - 25 - 2.47, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_L = new Vector2d(5 - 32.25 - 2.47, Robot.ULTIMATE_GOAL_POS.getY());
         this.hardwareMap = map;
         this.telemetry = telemetry;
 
@@ -95,11 +96,11 @@ public class Robot {
 
     public void blue(){
         blue = true;
+        ULTIMATE_GOAL_POS = new Vector2d(3, 136);
     }
 
     public void red(){
         blue = false;
-        ULTIMATE_GOAL_POS = new Vector2d(3, 136);
     }
 
     public static boolean isBlue(){
@@ -124,7 +125,7 @@ public class Robot {
 
         drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + (blue ? -Math.toRadians(90) : Math.toRadians(90)));
 
-        shooter.operate(gamepad1ex, gamepad2ex, getPos(), getData2(), getData(), packet);
+        shooter.operate(gamepad1ex, gamepad2ex, getPos(), packet);
         intake.operate(gamepad1ex, gamepad2ex);
         wobbleGoal.operate(gamepad1ex, gamepad2ex);
 
@@ -217,6 +218,7 @@ public class Robot {
     public void updateBulkData(){
         data = hub1.getBulkInputData();
         data2 = hub2.getBulkInputData();
+        shooter.updateData(data2);
     }
 
     public void updatePos(){

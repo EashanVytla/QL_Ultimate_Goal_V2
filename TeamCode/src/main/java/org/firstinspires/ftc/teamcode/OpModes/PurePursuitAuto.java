@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RobotMovement;
 import java.util.ArrayList;
 
 @Autonomous
+@Disabled
 public class PurePursuitAuto extends LinearOpMode {
     int state = 0;
     ElapsedTime elapsedTime;
@@ -51,8 +53,6 @@ public class PurePursuitAuto extends LinearOpMode {
         robot.localizer.reset();
 
         robot.setStartPose(new Pose2d(-13.5, 0,0));
-
-        robot.intake.barUp();
 
         robot.intake.write();
 
@@ -106,7 +106,6 @@ public class PurePursuitAuto extends LinearOpMode {
                 case 0:
                     if(elapsedTime.time() >= 0.1){
                         robot.wobbleGoal.autoLift();
-                        robot.intake.barDown();
                         elapsedTime.reset();
                         RobotMovement.resetIndex();
                         state++;
@@ -311,7 +310,6 @@ public class PurePursuitAuto extends LinearOpMode {
 
                     break;
                 case 5:
-                    robot.intake.barUp();
                     gtp = true;
                     points.add(new CurvePoint(new Pose2d(12.3, 109.75, Math.toRadians(325)), 0.5d, 0.5d, 25));
                     points.add(new CurvePoint(new Pose2d(-6.6, 75.3, Math.toRadians(0)), 0.5d, 0.5d, 25));

@@ -23,10 +23,10 @@ public class MiddleAuto extends LinearOpMode {
     private boolean powershotBool = false;
 
     private Pose2d POWER_SHOT_POS = new Pose2d(-20d, 52d, Math.toRadians(0));
-    private Pose2d ZONE_1_POS = new Pose2d(17, 79, Math.toRadians(0));
-    private Pose2d ZONE_2_POS = new Pose2d(-4.5, 103.5, Math.toRadians(0));
-    private Pose2d ZONE_4_POS = new Pose2d(19, 109.5, Math.toRadians(325));
-    private Pose2d PARK = new Pose2d(-20.6, 75.3, Math.toRadians(0));
+    private Pose2d ZONE_1_POS = new Pose2d(14, 79, Math.toRadians(0));
+    private Pose2d ZONE_2_POS = new Pose2d(-0.5, 103.5, Math.toRadians(0));
+    private Pose2d ZONE_4_POS = new Pose2d(15, 105, Math.toRadians(325));
+    private Pose2d PARK = new Pose2d(-16.6, 75.3, Math.toRadians(0));
 
     private int ringCase = 0;
     ArrayList<Vector2d> bounceBackPoints = new ArrayList<>();
@@ -34,16 +34,15 @@ public class MiddleAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
         elapsedTime = new ElapsedTime();
         robot = new Robot(hardwareMap, telemetry);
         robot.localizer.reset();
 
-        robot.intake.barUp();
+        robot.intake.initAuto();
 
         robot.intake.write();
 
-        robot.setStartPose(new Pose2d(-13.5, 0));
+        robot.shooter.resetRotator();
 
         boolean bigPID = false;
 
@@ -60,6 +59,7 @@ public class MiddleAuto extends LinearOpMode {
         robot.initializeWebcam();
 
         while(!isStarted() && !isStopRequested()){
+            telemetry.addData("Rotator", robot.shooter.rotator.motor.getMode());
             ringCase = robot.getRingStackCase();
 
             telemetry.addData("Ring Case", ringCase);
@@ -84,11 +84,15 @@ public class MiddleAuto extends LinearOpMode {
             elapsedTime.reset();
         }
 
+        robot.setStartPose(new Pose2d(Robot.isBlue() ? 8.5 : -13.5, 0));
+
         waitForStart();
 
         //robot.stopWebcam();
 
         elapsedTime.startTime();
+
+        robot.shooter.resetRotator();
 
         while(opModeIsActive()){
             robot.updateBulkData();
@@ -109,17 +113,23 @@ public class MiddleAuto extends LinearOpMode {
                         state++;
                     }
 
+                    robot.intake.release();
+
                     break;
                 case 1:
                     points.add(new CurvePoint(new Pose2d(0, 0, Math.toRadians(0)), 1d, 1d, 25));
                     points.add(new CurvePoint(new Pose2d(-16d, 27d, Math.toRadians(0)), 0.75d, 1d, 25));
                     points.add(new CurvePoint(POWER_SHOT_POS, 0.5d, 1.0d, 25));
+                    telemetry.addData("Rotator Error 2", Math.toDegrees(robot.shooter.getRotatorError2()));
+                    telemetry.addData("Rotator Error", Math.toDegrees(robot.shooter.getRotatorError()));
+
+                    robot.shooter.setFlywheelVelocity(1460, flywheelVelo);
 
                     if(powershotBool){
                         switch(powershot){
                             case 0:
                                 //FIRST POWERSHOT
-                                robot.shooter.setRotator(1, robot.getPos());
+                                robot.shooter.setRotator(1, robot.getPos(), false);
                                 robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
 
                                 if(readyForPowershot){
@@ -134,11 +144,12 @@ public class MiddleAuto extends LinearOpMode {
                                     if(elapsedTime.time() > 1.0){
                                         readyForPowershot = false;
                                         firstBB = true;
+                                        robot.shooter.resetRotatorPID();
                                         elapsedTime.reset();
                                         powershot++;
                                     }
                                 }else{
-                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && Math.abs(robot.shooter.getRotatorError2()) < Math.toRadians(0.75)){
+                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1440 && Math.abs(robot.shooter.getRotatorError()) < Math.toRadians(0.75)){
                                         if(elapsedTime.time() > 0.5){
                                             readyForPowershot = true;
                                             elapsedTime.reset();
@@ -162,11 +173,12 @@ public class MiddleAuto extends LinearOpMode {
 
                                     if(elapsedTime.time() > 1.0){
                                         readyForPowershot = false;
+                                        robot.shooter.resetRotatorPID();
                                         elapsedTime.reset();
                                         powershot++;
                                     }
                                 }else{
-                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && Math.abs(robot.shooter.getRotatorError2()) < Math.toRadians(0.75)){
+                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1440 && Math.abs(robot.shooter.getRotatorError2()) < Math.toRadians(0.75)){
                                         if(elapsedTime.time() > 0.5){
                                             readyForPowershot = true;
                                             elapsedTime.reset();
@@ -193,12 +205,13 @@ public class MiddleAuto extends LinearOpMode {
                                         firstBB = true;
                                         robot.shooter.setFlywheelPower(0.0);
                                         elapsedTime.reset();
+                                        robot.shooter.resetRotatorPID();
                                         state++;
                                     }
 
                                 }else{
                                     robot.shooter.flicker.setPos(Flicker.inPos);
-                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1340 && Math.abs(robot.shooter.getRotatorError2()) < Math.toRadians(0.75)){
+                                    if(robot.shooter.getFlywheelVelcoity(robot.getData2()) >= 1440 && Math.abs(robot.shooter.getRotatorError2()) < Math.toRadians(0.75)){
                                         if(elapsedTime.time() > 1.0){
                                             readyForPowershot = true;
                                             elapsedTime.reset();
@@ -222,12 +235,15 @@ public class MiddleAuto extends LinearOpMode {
 
                     telemetry.addData("POWERSHOT", powershot);
                     telemetry.addData("CHECK THIS", readyForPowershot);
-
-                    robot.shooter.setFlywheelVelocity(1460, flywheelVelo);
-
                     break;
                 case 2:
                     if (elapsedTime.time() > 3.5){
+                        if(elapsedTime.time() > 8){
+                            elapsedTime.reset();
+                            state++;
+                            ringsFound = true;
+                        }
+
                         if(firstBB){
                             robot.stopWebcam();
                             sortTargets();
@@ -258,16 +274,17 @@ public class MiddleAuto extends LinearOpMode {
                     break;
                 case 3:
                     robot.shooter.setFlywheelPower(0.0);
-                    points.add(new CurvePoint(new Pose2d(-21d, 56d, Math.toRadians(0)), 1d, 1d, 25));
+                    points.add(new CurvePoint(POWER_SHOT_POS.getX() - 5, POWER_SHOT_POS.getY() + 50, 1.0, 1.0, 25.0, 0));
+
                     switch (ringCase){
                         case 0:
                             points.add(new CurvePoint(ZONE_1_POS, 1d, 1d, 25));
                             break;
                         case 1:
-                            points.add(new CurvePoint(ZONE_2_POS, robot.getPos().vec().distTo(ZONE_2_POS.vec()) < 15 ? 0.2 : 1d, 1d, 25));
+                            points.add(new CurvePoint(ZONE_2_POS, 1d, 1d, 25));
                             break;
                         case 4:
-                            points.add(new CurvePoint(ZONE_4_POS, robot.getPos().vec().distTo(ZONE_4_POS.vec()) < 15 ? 0.5 : 1d, 1d, 25));
+                            points.add(new CurvePoint(ZONE_4_POS, 1d, 1d, 25));
                             break;
                     }
 
@@ -275,7 +292,6 @@ public class MiddleAuto extends LinearOpMode {
                         robot.intake.setPower(0.0);
                         if(elapsedTime.time() > 1.5){
                             elapsedTime.reset();
-                            robot.drive.resetPID();
                             if(ringsFound){
                                 state++;
                             }else{
@@ -335,13 +351,14 @@ public class MiddleAuto extends LinearOpMode {
                     break;
                 case 5:
                     robot.shooter.setFlywheelPower(0.0);
-                    robot.intake.barUp();
-                    gtp = true;
-                    points.add(new CurvePoint(new Pose2d(12.3, 109.75, Math.toRadians(325)), 0.5d, 0.5d, 25));
+                    points.add(new CurvePoint(new Pose2d(12.3, 109.75, Math.toRadians(325)), 1.0d, 1.0d, 25));
+                    if(!ringsFound) {
+                        points.add(new CurvePoint(POWER_SHOT_POS.getX() - 5, POWER_SHOT_POS.getY() + 50, 1.0, 1.0, 25.0, 0));
+                    }
                     points.add(new CurvePoint(PARK, 0.5d, 0.5d, 25));
 
                     if(PARK.vec().distTo(robot.getPos().vec()) < 2.5){
-                        robot.wobbleGoal.down();
+                        robot.wobbleGoal.lift();
                         robot.wobbleGoal.clamp();
                     }
 
@@ -364,6 +381,8 @@ public class MiddleAuto extends LinearOpMode {
             robot.intake.write();
 
             telemetry.addData("Position", robot.getPos());
+            //robot.updateBulkData();
+            //robot.updatePos();
             telemetry.addData("State", state);
             telemetry.update();
         }

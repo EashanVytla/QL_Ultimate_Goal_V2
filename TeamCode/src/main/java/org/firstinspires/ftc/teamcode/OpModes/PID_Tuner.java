@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.Components.Robot;
@@ -21,7 +22,7 @@ public class PID_Tuner extends OpMode {
     public void loop() {
         robot.updateBulkData();
 
-        robot.GoTo(new Pose2d(30, 30, 0), new Pose2d(1, 1, 1));
+        robot.GoTo(new Pose2d(0, 30, 0), new Pose2d(1, 1, 1));
 
         telemetry.update();
     }

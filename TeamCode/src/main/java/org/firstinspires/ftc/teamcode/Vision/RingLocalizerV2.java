@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.Math.Vector3;
 import org.opencv.android.Utils;
 import org.opencv.calib3d.Calib3d;
@@ -133,8 +134,9 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
         //Creating the kernal of 15, 15 structuring element
         Mat kernal = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2 * VisionConstants.dilationConstant + 1, 2 * VisionConstants.dilationConstant + 1));
+        Mat kernal2 = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2 * VisionConstants.erosionConstant + 1, 2 * VisionConstants.erosionConstant + 1));
         //Dilating the image parameters are source, destination, and kernal
-        //Imgproc.erode(HSVMat, HSVMat, kernal);
+        Imgproc.erode(HSVMat, HSVMat, kernal2);
         Imgproc.dilate(HSVMat, HSVMat, kernal);
 
         //Fingding the contours based on the HSV ranges
@@ -224,7 +226,7 @@ public class RingLocalizerV2 extends OpenCvPipeline {
 
         for(int i = 0; i < ringPositions.size(); i++){
             if(currentPos.getY() - ringPositions.get(i).getX() < 135) {
-                positions.add(new Vector2d(currentPos.getX() + ringPositions.get(i).getY(), currentPos.getY() - ringPositions.get(i).getX()));
+                positions.add(new Vector2d(currentPos.getX() + (Robot.isBlue() ? -ringPositions.get(i).getY() : ringPositions.get(i).getY()), currentPos.getY() - ringPositions.get(i).getX()));
             }
         }
 
