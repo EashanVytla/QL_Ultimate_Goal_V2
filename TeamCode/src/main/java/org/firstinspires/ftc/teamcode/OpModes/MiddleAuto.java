@@ -23,10 +23,10 @@ public class MiddleAuto extends LinearOpMode {
     private boolean powershotBool = false;
 
     private Pose2d POWER_SHOT_POS = new Pose2d(-20d, 52d, Math.toRadians(0));
-    private Pose2d ZONE_1_POS = new Pose2d(14, 79, Math.toRadians(0));
+    private Pose2d ZONE_1_POS = new Pose2d(10, 79, Math.toRadians(0));
     private Pose2d ZONE_2_POS = new Pose2d(-0.5, 103.5, Math.toRadians(0));
-    private Pose2d ZONE_4_POS = new Pose2d(15, 105, Math.toRadians(325));
-    private Pose2d PARK = new Pose2d(-16.6, 75.3, Math.toRadians(0));
+    private Pose2d ZONE_4_POS = new Pose2d(15, 109, Math.toRadians(325));
+    private Pose2d PARK = new Pose2d(-19.6, 75.3, Math.toRadians(0));
 
     private int ringCase = 0;
     ArrayList<Vector2d> bounceBackPoints = new ArrayList<>();
@@ -80,6 +80,10 @@ public class MiddleAuto extends LinearOpMode {
                 telemetry.addData("RED SIDE AUTO...", "TEEHEE");
             }
 
+            robot.updateBulkData();
+
+            telemetry.addData("Rotator Position", Math.toDegrees(robot.shooter.getRotatorPos()));
+
             telemetry.update();
             elapsedTime.reset();
         }
@@ -91,8 +95,6 @@ public class MiddleAuto extends LinearOpMode {
         //robot.stopWebcam();
 
         elapsedTime.startTime();
-
-        robot.shooter.resetRotator();
 
         while(opModeIsActive()){
             robot.updateBulkData();
@@ -112,6 +114,9 @@ public class MiddleAuto extends LinearOpMode {
                         RobotMovement.resetIndex();
                         state++;
                     }
+
+                    robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
+
 
                     robot.intake.release();
 
@@ -224,17 +229,16 @@ public class MiddleAuto extends LinearOpMode {
                         }
                     }else{
                         elapsedTime.reset();
-                        if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 1.0 && Math.abs(Robot.wrapHeading(robot.getPos().getHeading())) < Math.toRadians(1.0)){
+                        if(robot.getPos().vec().distTo(points.get(points.size() - 1).toVec()) < 2.0 && Math.abs(Robot.wrapHeading(robot.getPos().getHeading())) < Math.toRadians(2.0)){
                             powershotBool = true;
                             robot.initializeRingLocalizer();
                             robot.shooter.resetRotatorPID();
                         }
 
+                        robot.shooter.setFlap(robot.shooter.getFlapPosPowerShot(Robot.POWER_SHOT_R.distTo(robot.getPos().vec())));
+
                         robot.shooter.setRotator(1, robot.getPos());
                     }
-
-                    telemetry.addData("POWERSHOT", powershot);
-                    telemetry.addData("CHECK THIS", readyForPowershot);
                     break;
                 case 2:
                     if (elapsedTime.time() > 3.5){

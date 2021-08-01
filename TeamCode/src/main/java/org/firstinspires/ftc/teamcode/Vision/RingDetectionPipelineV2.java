@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.Vision;
 import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.arcrobotics.ftclib.purepursuit.waypoints.PointTurnWaypoint;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -74,6 +76,8 @@ public class RingDetectionPipelineV2 extends OpenCvPipeline
         //Imgproc.drawContours(contoursOnFrameMat, contoursList, -1, new Scalar(0, 0, 255), 2, 8);
         boolean contoursExist = false;
 
+        Imgproc.line(contoursOnFrameMat, new Point(0, VisionConstants.HORIZON), new Point(300, VisionConstants.HORIZON), new Scalar(255, 255, 255), 3);
+
         for (MatOfPoint contour : contoursList) {
             Rect rect = Imgproc.boundingRect(contour);
 
@@ -85,7 +89,7 @@ public class RingDetectionPipelineV2 extends OpenCvPipeline
                 Imgproc.putText(contoursOnFrameMat, String.valueOf(rect.area()), rect.tl(), 0, 0.5, new Scalar(255, 255, 255));
             }
 
-            if(rect.area() < 7000 && rect.area() > 2000){
+            if(rect.area() < 7000 && rect.area() > 2000 && rect.y > VisionConstants.HORIZON){
                 contoursExist = true;
                 ringRect = rect;
             }

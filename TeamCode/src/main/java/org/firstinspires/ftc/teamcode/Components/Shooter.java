@@ -68,7 +68,7 @@ public class Shooter {
     public static double kS = 0.0;
     public static double kV = 1.075;
 
-    public double stopperIn = 0.82;
+    public double stopperIn = 0.63;
     public double stopperOpen = 0.0;
     private boolean stopperToggle = false;
 
@@ -82,6 +82,7 @@ public class Shooter {
 
     private ElapsedTime timer = new ElapsedTime();
     private RevBulkData data2;
+    private boolean speedToggle = false;
 
     public Shooter(HardwareMap map, Telemetry telemetry){
         this.telemetry = telemetry;
@@ -91,7 +92,7 @@ public class Shooter {
         rotator = new Caching_Motor(map, "rotator", 1e-6);
         stopper = new Caching_Servo(map, "stopper");
         stopper.setPosition(stopperIn);
-        flap.setPosition(0.2);
+        flap.setPosition(0.0);
 
         rotator.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -186,7 +187,7 @@ public class Shooter {
 
     public void setRotator(Pose2d currentPos) {
         //double targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2(((midGoalToggle ? Robot.ULTIMATE_GOAL2_POS.getX() : Robot.ULTIMATE_GOAL_POS.getX()) - currentPos.getX()), (((midGoalToggle ? Robot.ULTIMATE_GOAL2_POS.getY() : Robot.ULTIMATE_GOAL_POS.getY()) - currentPos.getY())));
-        double targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2((Robot.ULTIMATE_GOAL_POS.getX() - currentPos.getX()), ((Robot.ULTIMATE_GOAL_POS.getY() - currentPos.getY())));
+        double targetangle = Math.atan2((Robot.ULTIMATE_GOAL_POS.getX() - ((Robot.isBlue() ? -1 : 1) * currentPos.getX())), ((Robot.ULTIMATE_GOAL_POS.getY() - currentPos.getY())));
         double heading = (Robot.isBlue() ? -currentPos.getHeading() : currentPos.getHeading()) + (Robot.isBlue() ? (2 * Math.PI) : 0);
 
         /*if(heading < 2 * Math.PI && heading >= Math.PI){
@@ -214,16 +215,16 @@ public class Shooter {
 
         switch(powerShot){
             case 1:
-                targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2((Robot.POWER_SHOT_R.getX() - currentPos.getX()), (Robot.POWER_SHOT_R.getY() - currentPos.getY()));
+                targetangle = Math.atan2((Robot.POWER_SHOT_R.getX() - ((Robot.isBlue() ? -1 : 1) * currentPos.getX())), (Robot.POWER_SHOT_R.getY() - currentPos.getY()));
                 break;
             case 2:
-                targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2((Robot.POWER_SHOT_M.getX() - currentPos.getX()), (Robot.POWER_SHOT_M.getY() - currentPos.getY()));
+                targetangle = Math.atan2((Robot.POWER_SHOT_M.getX() - ((Robot.isBlue() ? -1 : 1) * currentPos.getX())), (Robot.POWER_SHOT_M.getY() - currentPos.getY()));
                 break;
             case 3:
-                targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2((Robot.POWER_SHOT_L.getX() - currentPos.getX()), (Robot.POWER_SHOT_L.getY() - currentPos.getY()));
+                targetangle = Math.atan2((Robot.POWER_SHOT_L.getX() - ((Robot.isBlue() ? -1 : 1) * currentPos.getX())), (Robot.POWER_SHOT_L.getY() - currentPos.getY()));
                 break;
             default:
-                 targetangle = (Robot.isBlue() ? -1 : 1) * Math.atan2((Robot.ULTIMATE_GOAL_POS.getX() - currentPos.getX()), (Robot.ULTIMATE_GOAL_POS.getY() - currentPos.getY()));
+                 targetangle = Math.atan2((Robot.ULTIMATE_GOAL_POS.getX() - ((Robot.isBlue() ? -1 : 1) * currentPos.getX())), (Robot.ULTIMATE_GOAL_POS.getY() - currentPos.getY()));
                  break;
         }
 
@@ -315,7 +316,8 @@ public class Shooter {
     }
 
     public double getRotatorPos(){
-        return (-(data2.getMotorCurrentPosition(rotator.motor)/1440.0) * (2 * Math.PI)) + ROTATOR_0;
+        //return (-(data2.getMotorCurrentPosition(rotator.motor)/1440.0) * (2 * Math.PI)) + ROTATOR_0;
+        return (-(data2.getMotorCurrentPosition(rotator.motor)/1440.0) * (2 * Math.PI)) + Math.toRadians(114);
     }
 
     public double getRotatorError(){
@@ -332,6 +334,10 @@ public class Shooter {
         packet.put("Flywheel Velocity", flywheelVelo);
 
         telemetry.addData("Dist to Ultimate Goal", currentPos.vec().distTo(Robot.ULTIMATE_GOAL_POS));
+
+        if(gamepad1Ex.isPress(GamepadEx.Control.dpad_up)){
+            speedToggle = !speedToggle;
+        }
 
         if(gamepad1Ex.isPress(GamepadEx.Control.a)){
             powerShotToggle++;
@@ -372,7 +378,7 @@ public class Shooter {
 
         if (flywheelToggle) {
             //if(powerShotToggle == 0) {
-                setFlywheelVelocity(flywheelTargetVelo, flywheelVelo);
+                setFlywheelVelocity(speedToggle ? 1900 : flywheelTargetVelo, flywheelVelo);
             /*}else{
                 setFlywheelVelocity(1350, flywheelVelo);
             }*/
@@ -394,11 +400,11 @@ public class Shooter {
                     flicker.resetTime();
                 }
 
-                stopperToggle = true;
                 stopper.setPosition(stopperOpen);
             }else{
-                stopperToggle = false;
-                stopper.setPosition(stopperIn);
+                if(!stopperToggle) {
+                    stopper.setPosition(stopperIn);
+                }
                 timer.reset();
                 flicker.setPos(Flicker.inPos);
             }
@@ -408,6 +414,7 @@ public class Shooter {
         }
 
         if(gamepad1Ex.isPress(GamepadEx.Control.b)){
+            resetRotatorPID();
             flapToggle = !flapToggle;
         }
 
@@ -435,13 +442,17 @@ public class Shooter {
 
         telemetry.addData("Flap Offset", flapOffset);
 
-        if(bigPID){
-            setRotator(powerShotToggle, currentPos);
-            if(Math.toDegrees(Math.abs(rotatorPIDController2.getLastError())) < 0.5){
-                bigPID = false;
-            }
+        if(flapToggle){
+            setRotator(0, true);
         }else{
-            setRotator(powerShotToggle, currentPos, false);
+            if(bigPID){
+                setRotator(powerShotToggle, currentPos);
+                if(Math.toDegrees(Math.abs(rotatorPIDController2.getLastError())) < 0.5){
+                    bigPID = false;
+                }
+            }else{
+                setRotator(powerShotToggle, currentPos, false);
+            }
         }
 
         //Flap Regression Tuning

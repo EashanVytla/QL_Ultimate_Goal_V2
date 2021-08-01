@@ -4,9 +4,11 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.purepursuit.waypoints.PointTurnWaypoint;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
@@ -19,6 +21,7 @@ import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipelineV2;
 import org.firstinspires.ftc.teamcode.Vision.RingLocalizerV2;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
+import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -28,6 +31,7 @@ import org.openftc.revextensions2.RevBulkData;
 
 import java.util.ArrayList;
 
+@Config
 public class Robot {
     public Mecanum_Drive drive;
     public Shooter shooter;
@@ -51,9 +55,15 @@ public class Robot {
     OpenCvCamera webcam;
     OpenCvPipeline detector;
     private static Pose2d startPos = new Pose2d(0, 0, 0);
+
+    //FOR DASHBOARD
+    //public static Point BLUE_GOAL = new Point(7, 136);
+    //public static Point BLUE_POWERSHOT_L = new Point(-9.27, 136);
+    //public static Point BLUE_POWERSHOT_R = new Point(-17.97, 136);
+    //public static Point BLUE_POWERSHOT_M = new Point(-25.22, 136);
+
     public static Vector2d ULTIMATE_GOAL_POS;
     public static Vector2d ULTIMATE_GOAL2_POS;
-    public static Vector2d BLUE_GOAL_POS;
     private static boolean blue = false;
     public static Vector2d POWER_SHOT_R;
     public static Vector2d POWER_SHOT_M;
@@ -66,9 +76,9 @@ public class Robot {
         blue = false;
         ULTIMATE_GOAL_POS = new Vector2d(7, 136);
         ULTIMATE_GOAL2_POS = new Vector2d(5,-69);
-        POWER_SHOT_R = new Vector2d(5 - 17.20 - 1.57, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_M = new Vector2d(5 - 25 - 2.47, Robot.ULTIMATE_GOAL_POS.getY());
-        POWER_SHOT_L = new Vector2d(5 - 32.25 - 2.47, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_R = new Vector2d(-8.47, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_M = new Vector2d(-15.72, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_L = new Vector2d(-24.97, Robot.ULTIMATE_GOAL_POS.getY());
         this.hardwareMap = map;
         this.telemetry = telemetry;
 
@@ -96,7 +106,10 @@ public class Robot {
 
     public void blue(){
         blue = true;
-        ULTIMATE_GOAL_POS = new Vector2d(3, 136);
+        ULTIMATE_GOAL_POS = new Vector2d(3, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_R = new Vector2d(14.47, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_M = new Vector2d(23.72, Robot.ULTIMATE_GOAL_POS.getY());
+        POWER_SHOT_L = new Vector2d(30.97, Robot.ULTIMATE_GOAL_POS.getY());
     }
 
     public void red(){
@@ -123,7 +136,7 @@ public class Robot {
         updateBulkData();
         updatePos();
 
-        drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + (blue ? -Math.toRadians(90) : Math.toRadians(90)));
+        drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
 
         shooter.operate(gamepad1ex, gamepad2ex, getPos(), packet);
         intake.operate(gamepad1ex, gamepad2ex);

@@ -30,4 +30,6 @@ public class VisionConstants {
     public static double blurConstant = 5;
     public static double dilationConstant = 1.5;
     public static double erosionConstant = 1;
+
+    public static double HORIZON = 100;
 }

@@ -148,7 +148,7 @@ public class Mecanum_Drive{
     }
 
     public void driveCentric(Gamepad gamepad, double maxMove, double maxTurn, double heading){
-        setPowerCentic(Range.clip(gamepad.left_stick_x, -maxMove, maxMove), Range.clip(gamepad.left_stick_y, -maxMove, maxMove), Range.clip(gamepad.right_stick_x, -maxTurn, maxTurn), heading);
+        setPowerCentic(Range.clip(gamepad.left_stick_x, -maxMove, maxMove), Range.clip(gamepad.left_stick_y, -maxMove, maxMove), Range.clip(gamepad.right_stick_x, -maxTurn, maxTurn), (Robot.isBlue() ? -heading : heading) + (Robot.isBlue() ? (2 * Math.PI) : 0));
     }
 
     public void goToPoint(Pose2d targetPos, Pose2d currentPos, double xspeed, double yspeed, double zspeed){

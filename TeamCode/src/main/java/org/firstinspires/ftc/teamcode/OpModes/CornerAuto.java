@@ -51,10 +51,6 @@ public class CornerAuto extends LinearOpMode {
 
         robot.shooter.resetRotator();
 
-        if(Robot.isBlue()) {
-            Robot.ULTIMATE_GOAL_POS = new Vector2d(3, 136);
-        }
-
         robot.setStartPose(new Pose2d(Robot.isBlue() ? -19 : 19, 0));
 
         robot.initializeWebcam();
@@ -79,6 +75,10 @@ public class CornerAuto extends LinearOpMode {
                 telemetry.addData("RED SIDE AUTO...", "TEEHEE");
             }
 
+            robot.updateBulkData();
+
+            telemetry.addData("Rotator Position", Math.toDegrees(robot.shooter.getRotatorPos()));
+
             telemetry.update();
             elapsedTime.reset();
         }
@@ -89,7 +89,7 @@ public class CornerAuto extends LinearOpMode {
 
         elapsedTime.startTime();
 
-        robot.shooter.resetRotator();
+        //robot.shooter.resetRotator();
 
         while(opModeIsActive()){
             robot.updateBulkData();
