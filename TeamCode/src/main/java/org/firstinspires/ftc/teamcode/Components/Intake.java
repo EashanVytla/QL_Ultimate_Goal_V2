@@ -55,6 +55,9 @@ public class Intake {
     }
 
     public void operate(GamepadEx gamepad, GamepadEx gamepad2){
+        dropDownR.setPosition(0.21);
+        dropDownL.setPosition(0.77);
+
         if(gamepad.isPress(GamepadEx.Control.right_bumper) || gamepad2.isPress(GamepadEx.Control.right_bumper)){
             toggle = !toggle;
         }

@@ -11,6 +11,7 @@
 
 # Java class files
 *.class
+"C:\Data\FTC 2020-2021\QL_Ultimate_Goal_V2\TeamCode\src\main\java\org\firstinspires\ftc\teamcode\Odometry\S4T_Localizer.java"
 
 # Generated files
 bin/
