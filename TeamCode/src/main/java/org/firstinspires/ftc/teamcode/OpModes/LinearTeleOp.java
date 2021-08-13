@@ -47,8 +47,6 @@ public class LinearTeleOp extends LinearOpMode {
 
             robot.operate(gamepad1ex, gamepad2ex);
 
-            robot.shooter.write();
-
             telemetry.update();
             gamepad1ex.loop();
             gamepad2ex.loop();

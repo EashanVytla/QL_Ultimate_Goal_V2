@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Components;
 
 import android.graphics.Bitmap;
+import android.sax.TextElementListener;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -68,6 +69,8 @@ public class Robot {
     public static Vector2d POWER_SHOT_R;
     public static Vector2d POWER_SHOT_M;
     public static Vector2d POWER_SHOT_L;
+    private boolean fieldCentricDrive = true;
+    private boolean defenseMode = false;
 
     TelemetryPacket packet;
     FtcDashboard dashboard;
@@ -97,6 +100,9 @@ public class Robot {
         shooter = new Shooter(map, telemetry);
         intake = new Intake(map, telemetry);
         wobbleGoal = new WobbleGoal(map, telemetry);
+
+        wobbleGoal.lift();
+        wobbleGoal.write();
 
         updateBulkData();
 
@@ -136,21 +142,38 @@ public class Robot {
         updateBulkData();
         updatePos();
 
-        drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
+        if(gamepad2ex.isPress(GamepadEx.Control.right_stick_button)){
+            fieldCentricDrive = !fieldCentricDrive;
+        }
+
+        if(gamepad2ex.isPress(GamepadEx.Control.left_stick_button)){
+            defenseMode = !defenseMode;
+        }
+
+        if(fieldCentricDrive) {
+            telemetry.addLine("Driving field centric...");
+            drive.driveCentric(gamepad1ex.gamepad, 1.0, 1.0, getPos().getHeading() + Math.toRadians(90));
+        }else{
+            telemetry.addLine("Driving robot centric...");
+            drive.drive(gamepad1ex.gamepad, 1.0, 1.0);
+        }
 
         shooter.operate(gamepad1ex, gamepad2ex, getPos(), packet);
         intake.operate(gamepad1ex, gamepad2ex);
         wobbleGoal.operate(gamepad1ex, gamepad2ex);
 
         telemetry.addData("Robot Position:", getPos());
-        telemetry.addData("Ultimate Goal Position", ULTIMATE_GOAL_POS);
-        telemetry.addData("Ultimate Goal 2 Position", ULTIMATE_GOAL2_POS);
 
         dashboard.sendTelemetryPacket(packet);
         drive.write();
-        intake.write();
-        shooter.write();
-        wobbleGoal.write();
+        if(!defenseMode) {
+            intake.write();
+            shooter.write();
+            wobbleGoal.write();
+            telemetry.addLine("DEFENSE MODE OFF");
+        }else{
+            telemetry.addLine("DEFENSE MODE ON...");
+        }
     }
 
     public double getVelocityXMetersPerSecond(){

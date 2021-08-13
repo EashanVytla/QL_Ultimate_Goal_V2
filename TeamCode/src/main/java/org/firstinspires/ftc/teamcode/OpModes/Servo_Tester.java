@@ -12,12 +12,14 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 @TeleOp
 public class Servo_Tester extends LinearOpMode {
     //Set the hardware mapping name of the servo
-    final String name = "stopper";
+    final String name = "flap";
 
     Servo servo;
     private double pos;
     GamepadEx gamepadEx;
     private boolean servoToPosToggle = false;
+    //Left 0.77
+    //Right 0.21
 
     @Override
     public void runOpMode(){

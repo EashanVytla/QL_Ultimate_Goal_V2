@@ -78,7 +78,7 @@ public class Shooter {
     private double flapOffset = 0.0;
     private double rotatorOffset = 0.0;
     private boolean flapToggle = false;
-    //private boolean midGoalToggle = false;
+    private boolean midGoalToggle = false;
 
     private ElapsedTime timer = new ElapsedTime();
     private RevBulkData data2;
@@ -197,12 +197,6 @@ public class Shooter {
         double offset = targetangle - heading;
 
         setRotator((-offset - rotatorOffset), false);
-
-        telemetry.addData("IS BLUE?", Robot.isBlue());
-        telemetry.addData("OFFSET NEW", Math.toDegrees(-offset));
-        telemetry.addData("ULTIMATE GOAL POS NEW", Robot.ULTIMATE_GOAL_POS);
-        telemetry.addData("Target Position NEW", Math.toDegrees(targetangle));
-        telemetry.addData("Current Pos NEW", currentPos);
     }
 
     public void resetRotator(){
@@ -227,10 +221,6 @@ public class Shooter {
                  targetangle = Math.atan2((Robot.ULTIMATE_GOAL_POS.getX() - ((Robot.isBlue() ? -1 : 1) * currentPos.getX())), (Robot.ULTIMATE_GOAL_POS.getY() - currentPos.getY()));
                  break;
         }
-
-        telemetry.addData("Target Position NEW", Math.toDegrees(targetangle));
-        telemetry.addData("Current Pos NEW", currentPos);
-        telemetry.addData("IS BLUE?", Robot.isBlue());
 
         double heading = (Robot.isBlue() ? -currentPos.getHeading() : currentPos.getHeading()) + (Robot.isBlue() ? (2 * Math.PI) : 0);
 
@@ -333,8 +323,6 @@ public class Shooter {
         telemetry.addData("Flywheel Velocity", flywheelVelo);
         packet.put("Flywheel Velocity", flywheelVelo);
 
-        telemetry.addData("Dist to Ultimate Goal", currentPos.vec().distTo(Robot.ULTIMATE_GOAL_POS));
-
         if(gamepad1Ex.isPress(GamepadEx.Control.dpad_up)){
             speedToggle = !speedToggle;
         }
@@ -413,6 +401,13 @@ public class Shooter {
             flywheelMotor.setPower(0.0);
         }
 
+        if(gamepad2Ex.isPress(GamepadEx.Control.y)){
+            resetRotatorPID();
+            midGoalToggle = !midGoalToggle;
+        }
+
+        telemetry.addData("Mid Goal Toggle: ", midGoalToggle);
+
         if(gamepad1Ex.isPress(GamepadEx.Control.b)){
             resetRotatorPID();
             flapToggle = !flapToggle;
@@ -420,9 +415,13 @@ public class Shooter {
 
         if(powerShotToggle == 0){
             if(flapToggle){
-                setFlap(0.91);
+                setFlap(0.91 + flapOffset);
             } else {
-                setFlap(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())) + flapOffset);
+                if(midGoalToggle) {
+                    setFlap(0.84 + flapOffset);
+                }else{
+                    setFlap(getFlapPos(Robot.ULTIMATE_GOAL_POS.distTo(currentPos.vec())) + flapOffset);
+                }
             }
 
             telemetry.addData("Dist to Ultimate Goal", currentPos.vec().distTo(Robot.ULTIMATE_GOAL_POS));
@@ -440,9 +439,7 @@ public class Shooter {
             telemetry.addData("Dist to Left Power Shot", currentPos.vec().distTo(Robot.POWER_SHOT_L));
         }
 
-        telemetry.addData("Flap Offset", flapOffset);
-
-        if(flapToggle){
+        if(flapToggle || midGoalToggle){
             setRotator(0, true);
         }else{
             if(bigPID){
@@ -471,6 +468,5 @@ public class Shooter {
         telemetry.addData("Rotator Error 1", Math.toDegrees(getRotatorError()));
         telemetry.addData("Rotator Error 2", Math.toDegrees(getRotatorError2()));
         telemetry.addData("Rotator Angle", Math.toDegrees(getRotatorPos()));
-        telemetry.addData("Flap Position", flapTesterPos);
     }
 }
